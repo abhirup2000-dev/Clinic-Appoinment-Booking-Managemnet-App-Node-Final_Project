@@ -197,9 +197,6 @@ The application can be deployed on:
 
 - Render
 - Railway
-- VPS Servers
-- AWS EC2
-- DigitalOcean
 
 ---
 
