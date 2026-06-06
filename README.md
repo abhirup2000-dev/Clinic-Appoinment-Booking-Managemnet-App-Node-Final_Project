@@ -86,19 +86,20 @@ A full-stack Clinic Appointment Management System that allows patients to book a
 
 ```bash
 Clinic_Appointment_Management_System/
-│
-├── controllers/
-├── models/
-├── routes/
-├── middleware/
-├── config/
-├── views/
+├── app/
+│   ├── config/
+│   ├── controller/
+│   ├── middleware/
+│   ├── model/
+│   ├── routes/
+│   ├── service/
+│   ├── socket/
+│   ├── utils/
 ├── public/
 │   ├── css/
 │   ├── js/
 │   └── images/
-│
-├── uploads/
+├── views/
 ├── .env
 ├── app.js
 ├── package.json
