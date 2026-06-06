@@ -1,0 +1,42 @@
+<!-- Premium Shared Navbar -->
+<nav class="cc-navbar navbar navbar-expand-lg py-3 sticky-top" id="ccMainNav">
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+      <i class="bi bi-heart-pulse-fill"></i> CareConnect
+    </a>
+    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+        <li class="nav-item"><a class="nav-link<%= typeof activePage !== 'undefined' && activePage === 'home' ? ' active' : '' %>" href="/">Home</a></li>
+        <li class="nav-item"><a class="nav-link<%= typeof activePage !== 'undefined' && activePage === 'clinics' ? ' active' : '' %>" href="/clinics">Our Clinics</a></li>
+        <li class="nav-item"><a class="nav-link<%= typeof activePage !== 'undefined' && activePage === 'services' ? ' active' : '' %>" href="/services">Services</a></li>
+        <li class="nav-item"><a class="nav-link<%= typeof activePage !== 'undefined' && activePage === 'doctors' ? ' active' : '' %>" href="/doctors">Doctors</a></li>
+        <li class="nav-item"><a class="nav-link<%= typeof activePage !== 'undefined' && activePage === 'about' ? ' active' : '' %>" href="/about">About Us</a></li>
+        <li class="nav-item"><a class="nav-link<%= typeof activePage !== 'undefined' && activePage === 'contact' ? ' active' : '' %>" href="/contact">Contact</a></li>
+      </ul>
+      <div class="d-flex align-items-center gap-2">
+        <a href="/patient/login-view" class="btn btn-cc-primary">
+          <i class="bi bi-calendar2-check me-1"></i> Book Appointment
+        </a>
+        <a href="/doctor/login-view" class="btn btn-cc-outline">
+          <i class="bi bi-person-badge me-1"></i> Clinician
+        </a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<script>
+  // Navbar scroll effect
+  window.addEventListener('scroll', function() {
+    const nav = document.getElementById('ccMainNav');
+    if (window.scrollY > 30) {
+      nav.classList.add('scrolled');
+    } else {
+      nav.classList.remove('scrolled');
+    }
+  });
+</script>

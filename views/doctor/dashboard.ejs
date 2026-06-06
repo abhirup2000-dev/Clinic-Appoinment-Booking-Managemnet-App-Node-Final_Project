@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Doctor Dashboard — CareConnect</title>
+  
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <!-- Premium Stylesheet -->
+  <link rel="stylesheet" href="/css/main.css">
+  
+  <style>
+    /* Doctor Dashboard Specific Styles */
+    body {
+      background: var(--cc-slate-50);
+    }
+
+    .cc-dashboard-nav {
+      background: var(--cc-white);
+      border-bottom: 1px solid var(--cc-slate-200);
+    }
+
+    .cc-dashboard-header {
+      background: linear-gradient(135deg, var(--cc-indigo) 0%, var(--cc-indigo-hover) 100%);
+      color: var(--cc-white);
+      border-radius: var(--radius-xl);
+      padding: 40px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-indigo);
+    }
+
+    .cc-dashboard-header::before {
+      content: '';
+      position: absolute;
+      top: -30%; right: -10%;
+      width: 300px; height: 300px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .cc-avatar-lg {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .cc-avatar-md {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--cc-slate-200);
+    }
+
+    /* Tabs */
+    .cc-nav-tabs {
+      border-bottom: 2px solid var(--cc-slate-200);
+      margin-bottom: 30px;
+    }
+
+    .cc-nav-tabs .nav-link {
+      font-weight: 700;
+      color: var(--cc-slate-500);
+      border: none !important;
+      padding: 14px 24px;
+      transition: all 0.25s;
+      position: relative;
+    }
+
+    .cc-nav-tabs .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 50%;
+      width: 0; height: 3px;
+      background: var(--cc-indigo);
+      transition: all 0.25s var(--ease-smooth);
+      transform: translateX(-50%);
+    }
+
+    .cc-nav-tabs .nav-link.active {
+      color: var(--cc-indigo) !important;
+      background: none !important;
+    }
+
+    .cc-nav-tabs .nav-link.active::after {
+      width: 80%;
+    }
+
+    /* Ledger Table */
+    .cc-table {
+      margin-bottom: 0;
+    }
+
+    .cc-table th {
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.8px;
+      color: var(--cc-slate-500);
+      padding: 16px 20px;
+      background: var(--cc-slate-100);
+      border: none;
+    }
+
+    .cc-table td {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--cc-slate-100);
+    }
+
+    /* Statuses */
+    .cc-status-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: var(--radius-full);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .cc-status-pending { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
+    .cc-status-confirmed { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
+    .cc-status-completed { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+    .cc-status-cancelled { background: #fdf2f2; color: #dc2626; border: 1px solid #fecdcd; }
+
+    /* Dropdowns */
+    .notif-bell-wrapper {
+      position: relative;
+      cursor: pointer;
+    }
+    
+    .notif-bell-wrapper .badge {
+      position: absolute;
+      top: -5px; right: -8px;
+      font-size: 9px;
+      min-width: 18px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      animation: bellPulse 2s infinite;
+    }
+
+    @keyframes bellPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+    }
+
+    .notif-dropdown {
+      position: absolute;
+      top: 50px; right: 0;
+      width: 370px;
+      max-height: 440px;
+      background: var(--cc-white);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-xl);
+      z-index: 3000;
+      display: none;
+      overflow: hidden;
+      border: 1px solid var(--cc-slate-200);
+    }
+
+    .notif-dropdown.show { display: block; }
+    
+    .notif-dropdown-header {
+      padding: 16px 20px;
+      background: linear-gradient(135deg, var(--cc-indigo) 0%, var(--cc-indigo-hover) 100%);
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .notif-dropdown-body {
+      max-height: 340px;
+      overflow-y: auto;
+      padding: 8px 0;
+    }
+
+    .notif-dropdown-body::-webkit-scrollbar { width: 4px; }
+    .notif-dropdown-body::-webkit-scrollbar-thumb { background: var(--cc-slate-400); border-radius: 4px; }
+
+    .notif-item {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--cc-slate-100);
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      transition: background-color 0.2s;
+      cursor: pointer;
+    }
+
+    .notif-item:hover { background: #eef2ff; }
+    .notif-item.unread { background: #eef2ff; border-left: 3px solid var(--cc-indigo); }
+    
+    .notif-item .notif-icon {
+      width: 36px; height: 36px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; font-size: 16px;
+    }
+
+    .notif-icon.appointment { background: #dbeafe; color: #2563eb; }
+    .notif-icon.system { background: #f3e8ff; color: #7c3aed; }
+    .notif-icon.doctor { background: #d1fae5; color: #059669; }
+    .notif-icon.clinic { background: #fef3c7; color: #d97706; }
+    .notif-icon.payment { background: #fce7f3; color: #db2777; }
+    .notif-icon.feedback { background: #fff7ed; color: #ea580c; }
+    .notif-empty { text-align: center; padding: 40px 20px; color: var(--cc-slate-400); }
+
+    /* Live Toasts */
+    .live-toast-container {
+      position: fixed; top: 20px; right: 20px; z-index: 9999;
+      display: flex; flex-direction: column; gap: 10px; pointer-events: none;
+    }
+    
+    .live-toast {
+      pointer-events: auto; width: 360px;
+      background: rgba(255,255,255,0.98); backdrop-filter: blur(20px);
+      border-radius: var(--radius-lg); box-shadow: var(--shadow-xl);
+      border: 1px solid var(--cc-slate-200); padding: 16px 20px;
+      display: flex; gap: 14px; align-items: flex-start;
+      animation: toastSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      border-left: 4px solid var(--cc-indigo);
+    }
+
+    .live-toast.removing {
+      animation: toastSlideOut 0.4s cubic-bezier(0.55, 0, 1, 0.45) forwards;
+    }
+
+    @keyframes toastSlideIn {
+      from { transform: translateX(120%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes toastSlideOut {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(120%); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <%- include('../partials/flash') %>
+
+  <!-- Top Navbar -->
+  <nav class="navbar navbar-expand-lg cc-dashboard-nav py-3 sticky-top">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="/doctor/dashboard">
+        <i class="bi bi-heart-pulse-fill text-indigo"></i> CareConnect Clinic
+      </a>
+      <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#doctorNavbar">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse justify-content-end" id="doctorNavbar">
+        <div class="d-flex align-items-center gap-4 flex-wrap mt-3 mt-lg-0">
+          
+          <!-- Notification Bell -->
+          <div class="notif-bell-wrapper" id="notifBellWrapper" onclick="toggleNotifPanel()">
+            <i class="bi bi-bell-fill fs-5 text-muted"></i>
+            <span class="badge bg-danger text-white" id="notifBadge" style="display:none;">0</span>
+          </div>
+
+          <!-- Notification Dropdown Panel -->
+          <div class="notif-dropdown" id="notifDropdown">
+            <div class="notif-dropdown-header">
+              <span class="fw-bold"><i class="bi bi-bell-fill me-2"></i>Notifications</span>
+              <button class="btn btn-sm btn-light text-primary fw-bold" style="border-radius:8px; font-size:11px;" onclick="markAllRead(event)">Mark all read</button>
+            </div>
+            <div class="notif-dropdown-body" id="notifDropdownBody">
+              <div class="notif-empty">
+                <i class="bi bi-bell-slash fs-2 d-block mb-2"></i>
+                No notifications yet
+              </div>
+            </div>
+          </div>
+
+          <div class="d-flex align-items-center gap-3 border-start ps-4">
+            <div class="text-end d-none d-md-block">
+              <h6 class="mb-0 fw-bold text-dark"><%= doctor.name %></h6>
+              <small class="text-muted"><%= doctor.specialization %> • <%= doctor.clinic ? doctor.clinic.clinicName : 'Unassigned Clinic' %></small>
+            </div>
+            <img src="<%= doctor.profilePicture || 'https://placehold.co/150x150?text=Doctor' %>" alt="avatar" class="cc-avatar-md" style="border-color: var(--cc-indigo);">
+          </div>
+
+          <a href="/doctor/logout" class="btn btn-cc-outline py-2 px-3 btn-sm" style="border-color:var(--cc-danger); color:var(--cc-danger)!important;">
+            <i class="bi bi-box-arrow-right me-1"></i> Logout
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container my-5">
+    <!-- Welcome Header Banner -->
+    <div class="cc-dashboard-header d-flex justify-content-between align-items-center flex-wrap gap-4 mb-5">
+      <div class="d-flex align-items-center gap-4 flex-wrap">
+        <img src="<%= doctor.profilePicture || 'https://placehold.co/150x150?text=Doctor' %>" alt="avatar" class="cc-avatar-lg">
+        <div>
+          <h2 class="mb-2 fw-bold text-white">Welcome back, <%= doctor.name %>! 🩺</h2>
+          <p class="mb-0 text-white opacity-75">Assigned to Clinic: <strong><%= doctor.clinic ? doctor.clinic.clinicName : 'None' %></strong> (Specialization: <%= doctor.specialization %>)</p>
+        </div>
+      </div>
+      <div class="bg-white bg-opacity-20 px-4 py-3 rounded-4 text-center" style="backdrop-filter:blur(4px);">
+        <h3 class="mb-0 fw-extrabold text-white"><%= activeAppointments.length %></h3>
+        <small class="text-white opacity-75 text-uppercase fw-bold" style="font-size: 10px; letter-spacing:1px;">Active Slots</small>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <ul class="nav cc-nav-tabs" id="doctorTab" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="active-tab" data-bs-toggle="tab" data-bs-target="#activeAppts" type="button" role="tab" aria-selected="true">
+          <i class="bi bi-calendar-event me-2"></i>Active & Pending Consultations (<%= activeAppointments.length %>)
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="history-tab" data-bs-toggle="tab" data-bs-target="#historyAppts" type="button" role="tab" aria-selected="false">
+          <i class="bi bi-clock-history me-2"></i>Consultation History (<%= finishedAppointments.length %>)
+        </button>
+      </li>
+    </ul>
+
+    <div class="tab-content" id="doctorTabContent">
+      <!-- Active / Pending tab -->
+      <div class="tab-pane fade show active" id="activeAppts" role="tabpanel">
+        <div class="cc-card p-0 overflow-hidden">
+          <div class="p-4 border-bottom d-flex align-items-center gap-2">
+            <span class="cc-badge cc-badge-indigo"><i class="bi bi-activity"></i> Ledger</span>
+            <h4 class="fw-bold mb-0 text-dark">Schedules Ledger</h4>
+          </div>
+
+          <% if (activeAppointments.length === 0) { %>
+            <div class="text-center py-5 text-muted">
+              <i class="bi bi-calendar-x fs-1 mb-3 d-block text-slate-300"></i>
+              No active or pending patient appointments scheduled.
+            </div>
+          <% } else { %>
+            <div class="table-responsive">
+              <table class="table cc-table align-middle">
+                <thead>
+                  <tr>
+                    <th>Patient Name</th>
+                    <th>Age / Gender</th>
+                    <th>Contact Details</th>
+                    <th>Schedule Date / Slot</th>
+                    <th>Status</th>
+                    <th>Symptoms</th>
+                    <th>Outcome Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% activeAppointments.forEach(appt => { %>
+                    <tr>
+                      <td>
+                        <h6 class="mb-0 fw-bold text-dark"><%= appt.patient ? appt.patient.name : 'Unknown Patient' %></h6>
+                      </td>
+                      <td>
+                        <span class="small fw-semibold text-dark"><%= appt.patient ? appt.patient.age || 'N/A' : 'N/A' %> Yrs / <%= appt.patient ? appt.patient.gender || 'N/A' : 'N/A' %></span>
+                      </td>
+                      <td>
+                        <div class="small text-muted"><i class="bi bi-envelope me-1"></i><%= appt.patient ? appt.patient.email : 'N/A' %></div>
+                        <div class="small text-muted"><i class="bi bi-phone me-1"></i><%= appt.patient ? appt.patient.phone : 'N/A' %></div>
+                      </td>
+                      <td>
+                        <div class="fw-semibold text-dark">
+                          <%= new Date(appt.appointmentDate).toLocaleDateString("en-IN", { day: 'numeric', month: 'short', year: 'numeric' }) %>
+                        </div>
+                        <small class="text-muted"><i class="bi bi-clock me-1 text-indigo"></i><%= appt.appointmentTimeSlot %></small>
+                      </td>
+                      <td>
+                        <span class="cc-status-badge cc-status-<%= appt.status %>">
+                          <%= appt.status %>
+                        </span>
+                      </td>
+                      <td style="max-width: 180px;">
+                        <p class="mb-0 small text-muted text-truncate" title="<%= appt.symptoms %>"><%= appt.symptoms || 'None reported' %></p>
+                      </td>
+                      <td>
+                        <div class="d-flex gap-2">
+                          <% if (appt.status === 'pending') { %>
+                            <form action="/doctor/appointments/update/<%= appt._id %>" method="POST">
+                              <input type="hidden" name="status" value="confirmed">
+                              <button type="submit" class="btn btn-sm btn-cc-primary px-3 py-1.5" style="border-radius:8px;">
+                                <i class="bi bi-check-circle me-1"></i> Confirm
+                              </button>
+                            </form>
+                            <form action="/doctor/appointments/update/<%= appt._id %>" method="POST">
+                              <input type="hidden" name="status" value="cancelled">
+                              <button type="submit" class="btn btn-sm btn-cc-outline px-3 py-1.5" style="border-color:var(--cc-danger); color:var(--cc-danger)!important; border-radius:8px;">
+                                <i class="bi bi-x-circle me-1"></i> Reject
+                              </button>
+                            </form>
+                          <% } else if (appt.status === 'confirmed') { %>
+                            <button class="btn btn-sm btn-cc-primary px-3 py-1.5 text-white" 
+                                    style="background:var(--cc-emerald); border-radius:8px;"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#completeModal<%= appt._id %>">
+                              <i class="bi bi-prescription2 me-1"></i> Complete Visit
+                            </button>
+                            <a href="/doctor/live-chat/<%= appt._id %>" class="btn btn-sm btn-cc-outline px-3 py-1.5" style="border-color:var(--cc-indigo); color:var(--cc-indigo)!important; border-radius:8px;">
+                              <i class="bi bi-chat-dots me-1"></i> Chat
+                            </a>
+
+                            <!-- Prescription Modal -->
+                            <div class="modal fade" id="completeModal<%= appt._id %>" tabindex="-1" aria-hidden="true">
+                              <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content border-0 shadow" style="border-radius: var(--radius-xl);">
+                                  <div class="modal-header border-0 pb-0">
+                                    <h5 class="modal-title fw-bold text-dark">Complete Consultation</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                  </div>
+                                  <div class="modal-body p-4">
+                                    <form action="/doctor/appointments/complete/<%= appt._id %>" method="POST">
+                                      <div class="mb-3 text-start">
+                                        <label class="form-label small fw-bold text-muted">Patient</label>
+                                        <div class="fw-semibold text-dark"><%= appt.patient ? appt.patient.name : 'Unknown Patient' %></div>
+                                      </div>
+                                      <div class="mb-4">
+                                        <label class="form-label small fw-bold text-muted">Draft Prescription & Notes</label>
+                                        <textarea name="prescription" class="form-control" rows="4" placeholder="Enter medicines, dosages, diagnostic recommendations..." required style="height: auto;"></textarea>
+                                      </div>
+                                      <button type="submit" class="btn btn-cc-primary w-100 py-3" style="background:var(--cc-emerald);">
+                                        Save & Dispatch Prescription
+                                      </button>
+                                    </form>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          <% } %>
+                        </div>
+                      </td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Consultation History Tab -->
+      <div class="tab-pane fade" id="historyAppts" role="tabpanel">
+        <div class="cc-card p-0 overflow-hidden">
+          <div class="p-4 border-bottom d-flex align-items-center gap-2">
+            <span class="cc-badge cc-badge-indigo"><i class="bi bi-clock-history"></i> History Ledger</span>
+            <h4 class="fw-bold mb-0 text-dark">Consultation History</h4>
+          </div>
+
+          <% if (finishedAppointments.length === 0) { %>
+            <div class="text-center py-5 text-muted">
+              <i class="bi bi-folder2-open fs-1 mb-3 d-block text-slate-300"></i>
+              No historical patient cases recorded.
+            </div>
+          <% } else { %>
+            <div class="table-responsive">
+              <table class="table cc-table align-middle">
+                <thead>
+                  <tr>
+                    <th>Patient Name</th>
+                    <th>Schedule Date / Slot</th>
+                    <th>Status</th>
+                    <th>Symptoms Description</th>
+                    <th>Prescribed Medication & Notes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% finishedAppointments.forEach(appt => { %>
+                    <tr>
+                      <td>
+                        <h6 class="mb-0 fw-bold text-dark"><%= appt.patient ? appt.patient.name : 'Unknown Patient' %></h6>
+                        <small class="text-muted"><%= appt.patient ? appt.patient.phone : 'N/A' %></small>
+                      </td>
+                      <td>
+                        <div class="fw-semibold text-dark">
+                          <%= new Date(appt.appointmentDate).toLocaleDateString("en-IN", { day: 'numeric', month: 'short', year: 'numeric' }) %>
+                        </div>
+                        <small class="text-muted"><i class="bi bi-clock me-1 text-indigo"></i><%= appt.appointmentTimeSlot %></small>
+                      </td>
+                      <td>
+                        <span class="cc-status-badge cc-status-<%= appt.status %>">
+                          <%= appt.status %>
+                        </span>
+                      </td>
+                      <td>
+                        <span class="small text-muted font-monospace"><%= appt.symptoms || 'None reported' %></span>
+                      </td>
+                      <td>
+                        <% if (appt.prescription) { %>
+                          <div class="alert alert-success border-0 py-2 px-3 mb-0 rounded-3 small" style="background:#f0fdf4;">
+                            <i class="bi bi-prescription text-success me-1"></i><%= appt.prescription %>
+                          </div>
+                        <% } else { %>
+                          <span class="text-muted small">None / Cancelled</span>
+                        <% } %>
+                        <% if (appt.status === 'completed') { %>
+                          <div class="mt-2 d-flex flex-wrap gap-2">
+                            <a href="/doctor/live-chat/<%= appt._id %>" class="btn btn-sm btn-light border small" style="color:var(--cc-indigo);">
+                              <i class="bi bi-chat-dots me-1"></i> Chat Log
+                            </a>
+                            <button type="button" class="btn btn-sm btn-light border small" style="color:var(--cc-emerald);" data-bs-toggle="modal" data-bs-target="#uploadReportModal<%= appt._id %>">
+                              <i class="bi bi-file-earmark-medical me-1"></i> <%= appt.medicalReport ? 'Re-upload Report' : 'Upload Report' %>
+                            </button>
+                            
+                            <% if (appt.medicalReport) { %>
+                              <a href="<%= appt.medicalReport %>" target="_blank" class="btn btn-sm btn-light border small" style="color:var(--cc-indigo);">
+                                <i class="bi bi-eye me-1"></i> View Report
+                              </a>
+                            <% } %>
+                          </div>
+
+                          <!-- Upload Report Modal -->
+                          <div class="modal fade" id="uploadReportModal<%= appt._id %>" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                              <div class="modal-content border-0 shadow" style="border-radius: var(--radius-xl);">
+                                <div class="modal-header border-0 pb-0">
+                                  <h5 class="modal-title fw-bold text-dark">Upload Medical Report</h5>
+                                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body p-4">
+                                  <form action="/doctor/appointments/upload-report/<%= appt._id %>" method="POST" enctype="multipart/form-data">
+                                    <div class="mb-3 text-start">
+                                      <label class="form-label small fw-bold text-muted">Patient</label>
+                                      <div class="fw-semibold text-dark"><%= appt.patient ? appt.patient.name : 'Unknown Patient' %></div>
+                                    </div>
+                                    <div class="mb-4 text-start">
+                                      <label class="form-label small fw-bold text-muted">Select File (PDF, Images)</label>
+                                      <input type="file" name="report" class="form-control" accept=".pdf,image/*" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-cc-primary w-100 py-3" style="background:var(--cc-emerald);">
+                                      <i class="bi bi-cloud-upload me-1"></i> Upload Report
+                                    </button>
+                                  </form>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        <% } %>
+                      </td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Socket.IO Client -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const DOCTOR_ID = "<%= doctor._id %>";
+    socket.emit("join", DOCTOR_ID);
+
+    // Live toast container
+    const toastContainer = document.createElement("div");
+    toastContainer.className = "live-toast-container";
+    document.body.appendChild(toastContainer);
+
+    // Notification event
+    socket.on("notification", (data) => {
+      showLiveToast(data.title, data.message, data.type || "system");
+      refreshNotifBell();
+    });
+
+    // Clinic updates
+    socket.on("clinic-update", (data) => {
+      showLiveToast(data.title, data.message, "clinic");
+    });
+
+    // Doctor availability
+    socket.on("doctor-availability", (data) => {
+      showLiveToast(data.title, data.message, "doctor");
+    });
+
+    // Live toast renderer
+    function showLiveToast(title, message, type = "system") {
+      const iconMap = {
+        appointment: "bi-calendar-check-fill",
+        system: "bi-shield-fill-check",
+        doctor: "bi-person-badge-fill",
+        clinic: "bi-hospital-fill",
+        payment: "bi-credit-card-fill",
+        feedback: "bi-star-fill",
+      };
+      const toast = document.createElement("div");
+      toast.className = "live-toast";
+      toast.innerHTML = `
+        <div class="notif-icon ${type}" style="width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i class="bi ${iconMap[type] || 'bi-bell-fill'}"></i>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <h6 style="margin:0;font-size:13px;font-weight:700;color:#1e293b;">${title}</h6>
+          <p style="margin:4px 0 0;font-size:11px;color:#64748b;line-height:1.4;">${message}</p>
+          <span style="font-size:9px;color:#94a3b8;">${new Date().toLocaleTimeString()}</span>
+        </div>
+        <button onclick="this.parentElement.classList.add('removing');setTimeout(()=>this.parentElement.remove(),400)" style="background:none;border:none;color:#94a3b8;cursor:pointer;font-size:18px;padding:0;line-height:1;">&times;</button>
+      `;
+      toastContainer.appendChild(toast);
+      
+      setTimeout(() => {
+        if (toast.parentElement) {
+          toast.classList.add("removing");
+          setTimeout(() => toast.remove(), 400);
+        }
+      }, 8000);
+      
+      while (toastContainer.children.length > 5) {
+        toastContainer.firstChild.remove();
+      }
+    }
+
+    // Toggle Notifications dropdown
+    function toggleNotifPanel() {
+      const panel = document.getElementById("notifDropdown");
+      panel.classList.toggle("show");
+      if (panel.classList.contains("show")) loadNotifications();
+    }
+
+    document.addEventListener("click", (e) => {
+      const wrapper = document.getElementById("notifBellWrapper");
+      const panel = document.getElementById("notifDropdown");
+      if (wrapper && !wrapper.contains(e.target) && panel) panel.classList.remove("show");
+    });
+
+    async function loadNotifications() {
+      try {
+        const res = await fetch("/api/notifications", { headers: { "Content-Type": "application/json" } });
+        const result = await res.json();
+        const body = document.getElementById("notifDropdownBody");
+        if (!result.success || result.data.length === 0) {
+          body.innerHTML = '<div class="notif-empty"><i class="bi bi-bell-slash fs-2 d-block mb-2"></i>No notifications yet</div>';
+          return;
+        }
+        const iconMap = {
+          appointment: "bi-calendar-check-fill",
+          system: "bi-shield-fill-check",
+          doctor: "bi-person-badge-fill",
+          clinic: "bi-hospital-fill",
+          payment: "bi-credit-card-fill",
+          feedback: "bi-star-fill",
+        };
+        body.innerHTML = result.data.slice(0, 20).map(n => `
+          <div class="notif-item ${n.isRead ? '' : 'unread'}" onclick="markNotifRead('${n._id}', this)">
+            <div class="notif-icon ${n.type || 'system'}"><i class="bi ${iconMap[n.type] || 'bi-bell-fill'}"></i></div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:13px;font-weight:600;color:#1e293b;">${n.title}</div>
+              <div style="font-size:11px;color:#64748b;margin-top:2px;">${n.message}</div>
+              <div style="font-size:9px;color:#94a3b8;margin-top:4px;">${new Date(n.createdAt).toLocaleString()}</div>
+            </div>
+          </div>
+        `).join('');
+      } catch (err) { console.error("Load notifications error:", err); }
+    }
+
+    async function refreshNotifBell() {
+      try {
+        const res = await fetch("/api/notifications/unread-count");
+        const data = await res.json();
+        const badge = document.getElementById("notifBadge");
+        if (data.unreadCount > 0) {
+          badge.textContent = data.unreadCount > 99 ? "99+" : data.unreadCount;
+          badge.style.display = "flex";
+        } else {
+          badge.style.display = "none";
+        }
+      } catch (err) { console.error("Refresh bell error:", err); }
+    }
+
+    async function markNotifRead(id, el) {
+      try {
+        await fetch(`/api/notifications/${id}/read`, { method: "PUT" });
+        el.classList.remove("unread");
+        refreshNotifBell();
+      } catch (err) { console.error(err); }
+    }
+
+    async function markAllRead(e) {
+      e.stopPropagation();
+      try {
+        await fetch("/api/notifications/read-all", { method: "PUT" });
+        refreshNotifBell();
+        loadNotifications();
+      } catch (err) { console.error(err); }
+    }
+
+    // Initial load
+    refreshNotifBell();
+  </script>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

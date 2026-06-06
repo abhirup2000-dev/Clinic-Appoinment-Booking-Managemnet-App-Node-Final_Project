@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Medical Services — CareConnect</title>
+  <meta name="description" content="Explore CareConnect's comprehensive medical services across all major departments.">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="/css/main.css">
+</head>
+<body>
+  <%- include('../partials/flash') %>
+
+  <%- include('../partials/navbar', { activePage: 'services' }) %>
+
+  <!-- Page Header -->
+  <section class="cc-page-header">
+    <div class="container position-relative" style="z-index:2;">
+      <div class="cc-breadcrumb">
+        <a href="/">Home</a>
+        <i class="bi bi-chevron-right" style="font-size:11px;"></i>
+        <span>Medical Services</span>
+      </div>
+      <h1 class="mb-3">Medical Services</h1>
+      <p>Comprehensive clinical care across major departments, powered by experienced professionals under one ecosystem.</p>
+    </div>
+  </section>
+
+  <!-- Services Grid -->
+  <section class="cc-section">
+    <div class="container">
+      <div class="text-center mb-5">
+        <span class="cc-badge cc-badge-emerald mb-3"><i class="bi bi-plus-circle"></i> What We Offer</span>
+        <h2 class="cc-section-title">Our Specializations</h2>
+        <p class="cc-section-subtitle">Each department is staffed by certified professionals with years of experience in their respective fields.</p>
+      </div>
+
+      <div class="row g-4">
+        <!-- Cardiology -->
+        <div class="col-lg-4 col-md-6 cc-fade-up" style="transition-delay:0s;">
+          <div class="cc-service-card">
+            <div class="cc-service-icon cc-service-icon-danger"><i class="bi bi-heart-pulse-fill"></i></div>
+            <h4 class="fw-bold mb-3" style="color:var(--cc-slate-900);">Cardiology</h4>
+            <p class="mb-4" style="color:var(--cc-slate-500); line-height:1.7;">
+              Comprehensive heart diagnostics including ECG, echocardiography, stress tests, and cardiac rehabilitation. Our cardiologists provide personalized treatment plans for heart conditions.
+            </p>
+            <div class="d-flex flex-wrap gap-2 justify-content-center">
+              <span class="badge" style="background:var(--cc-slate-100); color:var(--cc-slate-600); font-size:11px;">ECG</span>
+              <span class="badge" style="background:var(--cc-slate-100); color:var(--cc-slate-600); font-size:11px;">Stress Test</span>
+              <span class="badge" style="background:var(--cc-slate-100); color:var(--cc-slate-600); font-size:11px;">Cardiac Rehab</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pediatrics -->
+        <div class="col-lg-4 col-md-6 cc-fade-up" style="transition-delay:0.1s;">
+          <div class="cc-service-card">
+            <div class="cc-service-icon cc-service-icon-emerald"><i class="bi bi-emoji-smile-fill"></i></div>
+            <h4 class="fw-bold mb-3" style="color:var(--cc-slate-900);">Pediatrics</h4>
+            <p class="mb-4" style="color:var(--cc-slate-500); line-height:1.7;">
+              Dedicated child healthcare services including immunizations, growth monitoring, developmental assessments, and acute illness management for infants to adolescents.
+            </p>
+            <div class="d-flex flex-wrap gap-2 justify-content-center">
+              <span class="badge" style="background:var(--cc-slate-100); color:var(--cc-slate-600); font-size:11px;">Immunization</span>
+              <span class="badge" style="background:var(--cc-slate-100); color:var(--cc-slate-600); font-size:11px;">Growth Check</span>
+              <span class="badge" style="background:var(--cc-slate-100); color:var(--cc-slate-600); font-size:11px;">Newborn Care</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dental Care -->
+        <div class="col-lg-4 col-md-6 cc-fade-up" style="transition-delay:0.2s;">
+          <div class="cc-service-card">
+            <div class="cc-service-icon cc-service-icon-info"><i class="bi bi-shield-check"></i></div>
+            <h4 class="fw-bold mb-3" style="color:var(--cc-slate-900);">Dental Care</h4>
+            <p class="mb-4" style="color:var(--cc-slate-500); line-height:1.7;">
+              Full-spectrum oral health services from routine cleanings and fillings to orthodontics, root canals, dental implants, and cosmetic dentistry procedures.
+            </p>
+            <div class="d-flex flex-wrap gap-2 justify-content-center">
+              <span class="badge" style="background:var(--cc-slate-100); color:var(--cc-slate-600); font-size:11px;">Orthodontics</span>
+              <span class="badge" style="background:var(--cc-slate-100); color:var(--cc-slate-600); font-size:11px;">Root Canal</span>
+              <span class="badge" style="background:var(--cc-slate-100); color:var(--cc-slate-600); font-size:11px;">Implants</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Neurology -->
+        <div class="col-lg-4 col-md-6 cc-fade-up" style="transition-delay:0.3s;">
+          <div class="cc-service-card">
+            <div class="cc-service-icon cc-service-icon-indigo"><i class="bi bi-activity"></i></div>
+            <h4 class="fw-bold mb-3" style="color:var(--cc-slate-900);">Neurology</h4>
+            <p class="mb-4" style="color:var(--cc-slate-500); line-height:1.7;">
+              Expert diagnosis and treatment of nervous system disorders including migraines, epilepsy, stroke recovery, and neurodegenerative diseases with advanced imaging technology.
+            </p>
+            <div class="d-flex flex-wrap gap-2 justify-content-center">
+              <span class="badge" style="background:var(--cc-slate-100); color:var(--cc-slate-600); font-size:11px;">EEG</span>
+              <span class="badge" style="background:var(--cc-slate-100); color:var(--cc-slate-600); font-size:11px;">Migraine</span>
+              <span class="badge" style="background:var(--cc-slate-100); color:var(--cc-slate-600); font-size:11px;">Stroke Rehab</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- General Medicine -->
+        <div class="col-lg-4 col-md-6 cc-fade-up" style="transition-delay:0.4s;">
+          <div class="cc-service-card">
+            <div class="cc-service-icon cc-service-icon-success"><i class="bi bi-hospital-fill"></i></div>
+            <h4 class="fw-bold mb-3" style="color:var(--cc-slate-900);">General Medicine</h4>
+            <p class="mb-4" style="color:var(--cc-slate-500); line-height:1.7;">
+              Primary care and wellness management including annual physicals, chronic disease management, preventive screenings, and comprehensive health assessments.
+            </p>
+            <div class="d-flex flex-wrap gap-2 justify-content-center">
+              <span class="badge" style="background:var(--cc-slate-100); color:var(--cc-slate-600); font-size:11px;">Health Check</span>
+              <span class="badge" style="background:var(--cc-slate-100); color:var(--cc-slate-600); font-size:11px;">Chronic Care</span>
+              <span class="badge" style="background:var(--cc-slate-100); color:var(--cc-slate-600); font-size:11px;">Preventive</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Orthopedics -->
+        <div class="col-lg-4 col-md-6 cc-fade-up" style="transition-delay:0.5s;">
+          <div class="cc-service-card">
+            <div class="cc-service-icon cc-service-icon-warning"><i class="bi bi-bone"></i></div>
+            <h4 class="fw-bold mb-3" style="color:var(--cc-slate-900);">Orthopedics</h4>
+            <p class="mb-4" style="color:var(--cc-slate-500); line-height:1.7;">
+              Musculoskeletal care including joint replacements, fracture management, sports medicine, spinal disorders, and physiotherapy-guided rehabilitation.
+            </p>
+            <div class="d-flex flex-wrap gap-2 justify-content-center">
+              <span class="badge" style="background:var(--cc-slate-100); color:var(--cc-slate-600); font-size:11px;">Joint Replace</span>
+              <span class="badge" style="background:var(--cc-slate-100); color:var(--cc-slate-600); font-size:11px;">Sports Med</span>
+              <span class="badge" style="background:var(--cc-slate-100); color:var(--cc-slate-600); font-size:11px;">Physio</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dermatology -->
+        <div class="col-lg-4 col-md-6 cc-fade-up" style="transition-delay:0.6s;">
+          <div class="cc-service-card">
+            <div class="cc-service-icon" style="background:rgba(168,85,247,0.1); color:#a855f7;"><i class="bi bi-droplet-fill"></i></div>
+            <h4 class="fw-bold mb-3" style="color:var(--cc-slate-900);">Dermatology</h4>
+            <p class="mb-4" style="color:var(--cc-slate-500); line-height:1.7;">
+              Skin health management including acne treatment, eczema care, skin cancer screening, cosmetic procedures, and laser therapy for various dermatological conditions.
+            </p>
+            <div class="d-flex flex-wrap gap-2 justify-content-center">
+              <span class="badge" style="background:var(--cc-slate-100); color:var(--cc-slate-600); font-size:11px;">Skin Care</span>
+              <span class="badge" style="background:var(--cc-slate-100); color:var(--cc-slate-600); font-size:11px;">Laser</span>
+              <span class="badge" style="background:var(--cc-slate-100); color:var(--cc-slate-600); font-size:11px;">Cosmetic</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ENT -->
+        <div class="col-lg-4 col-md-6 cc-fade-up" style="transition-delay:0.7s;">
+          <div class="cc-service-card">
+            <div class="cc-service-icon" style="background:rgba(236,72,153,0.1); color:#ec4899;"><i class="bi bi-ear-fill"></i></div>
+            <h4 class="fw-bold mb-3" style="color:var(--cc-slate-900);">ENT</h4>
+            <p class="mb-4" style="color:var(--cc-slate-500); line-height:1.7;">
+              Ear, nose, and throat specialists providing hearing tests, sinus treatments, tonsillectomy, voice disorder management, and allergy treatments.
+            </p>
+            <div class="d-flex flex-wrap gap-2 justify-content-center">
+              <span class="badge" style="background:var(--cc-slate-100); color:var(--cc-slate-600); font-size:11px;">Hearing</span>
+              <span class="badge" style="background:var(--cc-slate-100); color:var(--cc-slate-600); font-size:11px;">Sinus</span>
+              <span class="badge" style="background:var(--cc-slate-100); color:var(--cc-slate-600); font-size:11px;">Allergy</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Psychiatry -->
+        <div class="col-lg-4 col-md-6 cc-fade-up" style="transition-delay:0.8s;">
+          <div class="cc-service-card">
+            <div class="cc-service-icon" style="background:rgba(20,184,166,0.1); color:#14b8a6;"><i class="bi bi-brain"></i></div>
+            <h4 class="fw-bold mb-3" style="color:var(--cc-slate-900);">Psychiatry</h4>
+            <p class="mb-4" style="color:var(--cc-slate-500); line-height:1.7;">
+              Mental health services including counseling, anxiety & depression management, behavioral therapy, and substance abuse treatment with compassionate care.
+            </p>
+            <div class="d-flex flex-wrap gap-2 justify-content-center">
+              <span class="badge" style="background:var(--cc-slate-100); color:var(--cc-slate-600); font-size:11px;">Counseling</span>
+              <span class="badge" style="background:var(--cc-slate-100); color:var(--cc-slate-600); font-size:11px;">CBT</span>
+              <span class="badge" style="background:var(--cc-slate-100); color:var(--cc-slate-600); font-size:11px;">Therapy</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Process Section -->
+  <section class="cc-section cc-section-alt">
+    <div class="container">
+      <div class="text-center mb-5">
+        <span class="cc-badge cc-badge-indigo mb-3"><i class="bi bi-signpost-2"></i> How It Works</span>
+        <h2 class="cc-section-title">Book in 4 Simple Steps</h2>
+        <p class="cc-section-subtitle">Our streamlined process gets you from search to consultation in minutes, not hours.</p>
+      </div>
+      <div class="row g-4">
+        <div class="col-md-3 cc-fade-up" style="transition-delay:0s;">
+          <div class="text-center">
+            <div class="cc-service-icon cc-service-icon-emerald mx-auto mb-3" style="width:80px; height:80px; font-size:32px; border-radius:50%;">
+              <i class="bi bi-search"></i>
+            </div>
+            <h5 class="fw-bold mb-2" style="color:var(--cc-slate-900);">Search</h5>
+            <p class="small" style="color:var(--cc-slate-500);">Browse doctors by specialty, clinic, or location</p>
+          </div>
+        </div>
+        <div class="col-md-3 cc-fade-up" style="transition-delay:0.15s;">
+          <div class="text-center">
+            <div class="cc-service-icon cc-service-icon-indigo mx-auto mb-3" style="width:80px; height:80px; font-size:32px; border-radius:50%;">
+              <i class="bi bi-person-check"></i>
+            </div>
+            <h5 class="fw-bold mb-2" style="color:var(--cc-slate-900);">Select</h5>
+            <p class="small" style="color:var(--cc-slate-500);">Choose your preferred doctor and time slot</p>
+          </div>
+        </div>
+        <div class="col-md-3 cc-fade-up" style="transition-delay:0.3s;">
+          <div class="text-center">
+            <div class="cc-service-icon cc-service-icon-info mx-auto mb-3" style="width:80px; height:80px; font-size:32px; border-radius:50%;">
+              <i class="bi bi-calendar-check"></i>
+            </div>
+            <h5 class="fw-bold mb-2" style="color:var(--cc-slate-900);">Confirm</h5>
+            <p class="small" style="color:var(--cc-slate-500);">Review and confirm your appointment details</p>
+          </div>
+        </div>
+        <div class="col-md-3 cc-fade-up" style="transition-delay:0.45s;">
+          <div class="text-center">
+            <div class="cc-service-icon cc-service-icon-success mx-auto mb-3" style="width:80px; height:80px; font-size:32px; border-radius:50%;">
+              <i class="bi bi-camera-video"></i>
+            </div>
+            <h5 class="fw-bold mb-2" style="color:var(--cc-slate-900);">Consult</h5>
+            <p class="small" style="color:var(--cc-slate-500);">Visit the clinic or connect via digital consultation</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <%- include('../partials/footer') %>
+  <%- include('../partials/chat-widget') %>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.cc-fade-up, .cc-fade-left, .cc-fade-right').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>

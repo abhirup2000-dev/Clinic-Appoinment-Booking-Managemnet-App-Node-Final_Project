@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Doctor Live Chat — CareConnect</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <script src="/socket.io/socket.io.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Inter, sans-serif;
+      background: #f1f5f9;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      height: 65px;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      border-bottom: 1px solid #e2e8f0;
+      justify-content: space-between;
+    }
+
+    .user {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+    }
+
+    .status {
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #94a3b8;
+    }
+
+    .dot.online {
+      background: #10b981;
+    }
+
+    .chat {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .msg {
+      max-width: 70%;
+      padding: 10px 14px;
+      border-radius: 16px;
+      font-size: 14px;
+    }
+
+    .sent {
+      align-self: flex-end;
+      background: #10b981;
+      color: white;
+    }
+
+    .recv {
+      align-self: flex-start;
+      background: white;
+      border: 1px solid #e2e8f0;
+    }
+
+    .input {
+      display: flex;
+      gap: 10px;
+      padding: 12px;
+      background: #fff;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    input {
+      flex: 1;
+      padding: 10px 14px;
+      border-radius: 20px;
+      border: 1px solid #cbd5e1;
+      outline: none;
+    }
+
+    button {
+      border: none;
+      background: #10b981;
+      color: white;
+      width: 45px;
+      border-radius: 50%;
+    }
+  </style>
+</head>
+
+<body>
+  <%- include('../partials/flash') %>
+
+  <div class="topbar">
+    <div class="user">
+      <img id="patientImg" class="avatar" src="https://placehold.co/100">
+      <div>
+        <div id="patientName">Loading...</div>
+        <div class="status"><span id="dot" class="dot"></span> <span id="statusText">offline</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="chat" id="chat"></div>
+
+  <div class="input">
+    <input id="msg" placeholder="Type message..." disabled />
+    <button id="send" disabled><i class="bi bi-send"></i></button>
+  </div>
+
+  <script>
+    const appointmentId = "<%= appointmentId %>";
+    let socket;
+    let me;
+    let patientId;
+
+    async function init() {
+      // profile
+      const res = await fetch('/api/auth/profile', {
+        headers: {
+          Authorization: `Bearer ${getCookie("doctorAccessToken")}`
+        }
+      });
+
+      const data = await res.json();
+      me = data.data;
+
+      // appointment
+      const appt = await fetch(`/api/appointments/${appointmentId}`);
+      const apptData = await appt.json();
+
+      patientId = apptData.data.patient._id;
+
+      document.getElementById("patientName").innerText = apptData.data.patient.name;
+
+      connectSocket();
+      loadHistory();
+    }
+
+    function connectSocket() {
+      socket = io({
+        auth: {
+          token: getCookie("doctorAccessToken"),
+          userId: me._id,
+          role: me.role
+        }
+      });
+
+      socket.on("connect", () => {
+        document.getElementById("msg").disabled = false;
+        document.getElementById("send").disabled = false;
+
+        socket.emit("join-chat-room", appointmentId);
+      });
+
+      socket.on("receive-chat-message", (msg) => {
+        const isMine = msg.sender === me._id || msg.senderId === me._id;
+        if (!isMine) {
+          addMsg(msg, false);
+          playNotificationSound();
+        }
+      });
+
+      socket.on("presence-update", (users) => {
+        const online = users.includes(patientId);
+        document.getElementById("dot").classList.toggle("online", online);
+        document.getElementById("statusText").innerText = online ? "online" : "offline";
+      });
+    }
+
+    async function loadHistory() {
+      try {
+        const res = await fetch(`/api/live-chat/${appointmentId}`, {
+          headers: {
+            Authorization: `Bearer ${getCookie("doctorAccessToken")}`
+          }
+        });
+
+        const data = await res.json();
+
+        if (!data.success || !data.data) {
+          console.error("Failed to load chat history");
+          return;
+        }
+
+        data.data.forEach(m => {
+          addMsg(m, m.sender === me._id);
+        });
+      } catch (err) {
+        console.error("History load error:", err);
+      }
+    }
+
+    function addMsg(msg, mine) {
+      const div = document.createElement("div");
+      div.className = `msg ${mine ? "sent" : "recv"}`;
+      div.innerText = msg.content;
+      document.getElementById("chat").appendChild(div);
+    }
+
+    document.getElementById("send").onclick = () => {
+      const input = document.getElementById("msg");
+      const content = input.value.trim();
+      if (!content) return;
+
+      socket.emit("send-chat-message", {
+        appointmentId,
+        senderId: me._id,
+        sender: me._id,
+        receiverId: patientId,
+        content,
+        messageType: 'text'
+      });
+
+      addMsg({ content, sender: me._id }, true);
+      
+      // Persist to database via API
+      fetch(`/api/live-chat/${appointmentId}/send`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${getCookie("doctorAccessToken")}`
+        },
+        body: JSON.stringify({ content, messageType: "text" })
+      }).catch(err => console.error("Failed to persist message:", err));
+
+      input.value = "";
+    };
+
+    function getCookie(name) {
+      const v = `; ${document.cookie}`;
+      const parts = v.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+
+    function playNotificationSound() {
+      try {
+        const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+        audio.play().catch(e => console.log('Audio play failed:', e));
+      } catch (e) {}
+    }
+
+    init();
+  </script>
+
+</body>
+
+</html>

@@ -1,0 +1,55 @@
+<!-- Reusable Toast Notification System -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1060;">
+  <div id="appToast" class="toast align-items-center text-white border-0" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body d-flex align-items-center">
+        <i id="toastIcon" class="bi bi-info-circle-fill me-2 fs-5"></i>
+        <span id="toastMessage">Notification message</span>
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  </div>
+</div>
+
+<script>
+  /**
+   * Show a toast notification
+   * @param {string} message - The message to display
+   * @param {string} type - 'success', 'error', 'warning', or 'info'
+   */
+  function showToast(message, type = 'info') {
+    const toastEl = document.getElementById('appToast');
+    const toastMessage = document.getElementById('toastMessage');
+    const toastIcon = document.getElementById('toastIcon');
+    
+    // Clear previous classes
+    toastEl.className = 'toast align-items-center text-white border-0';
+    toastIcon.className = 'me-2 fs-5';
+
+    // Set colors and icons based on type
+    switch (type) {
+      case 'success':
+        toastEl.classList.add('bg-success');
+        toastIcon.classList.add('bi', 'bi-check-circle-fill');
+        break;
+      case 'error':
+        toastEl.classList.add('bg-danger');
+        toastIcon.classList.add('bi', 'bi-exclamation-triangle-fill');
+        break;
+      case 'warning':
+        toastEl.classList.add('bg-warning', 'text-dark');
+        toastEl.classList.remove('text-white');
+        toastIcon.classList.add('bi', 'bi-exclamation-circle-fill');
+        break;
+      default:
+        toastEl.classList.add('bg-primary');
+        toastIcon.classList.add('bi', 'bi-info-circle-fill');
+    }
+
+    toastMessage.textContent = message;
+
+    // Initialize and show via Bootstrap JS API
+    const toast = new bootstrap.Toast(toastEl, { delay: 4000 });
+    toast.show();
+  }
+</script>

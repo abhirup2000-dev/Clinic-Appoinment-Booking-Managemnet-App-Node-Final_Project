@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Clinics — CareConnect</title>
+  
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <!-- Premium Stylesheet -->
+  <link rel="stylesheet" href="/css/main.css">
+  
+  <style>
+    body {
+      background: var(--cc-slate-50);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    .cc-admin-layout {
+      display: flex;
+      width: 100%;
+    }
+
+    /* Sidebar Styling */
+    .cc-sidebar {
+      width: 280px;
+      background: linear-gradient(180deg, var(--cc-slate-900) 0%, var(--cc-slate-950) 100%);
+      color: var(--cc-white);
+      position: fixed;
+      top: 0; bottom: 0; left: 0;
+      padding: 30px 24px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .cc-sidebar-brand {
+      font-weight: 800;
+      font-size: 24px;
+      color: var(--cc-emerald) !important;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 40px;
+    }
+
+    .cc-sidebar-menu {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .cc-sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--cc-slate-400);
+      text-decoration: none;
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      font-size: 14.5px;
+      transition: all 0.3s var(--ease-smooth);
+    }
+
+    .cc-sidebar-link i {
+      font-size: 18px;
+    }
+
+    .cc-sidebar-link:hover {
+      color: var(--cc-white);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .cc-sidebar-link.active {
+      color: var(--cc-white);
+      background: linear-gradient(135deg, var(--cc-emerald), var(--cc-emerald-hover));
+      box-shadow: var(--shadow-emerald);
+    }
+
+    /* Main Content Styling */
+    .cc-main-content {
+      flex: 1;
+      margin-left: 280px;
+      padding: 40px;
+      min-width: 0;
+    }
+
+    .cc-topbar {
+      background: var(--cc-white);
+      border-radius: var(--radius-xl);
+      padding: 20px 30px;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 40px;
+      border: 1px solid var(--cc-slate-200);
+    }
+
+    .cc-avatar-md {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--cc-slate-200);
+    }
+
+    .cc-clinic-logo {
+      width: 50px;
+      height: 50px;
+      border-radius: var(--radius-sm);
+      object-fit: cover;
+      border: 1px solid var(--cc-slate-200);
+    }
+
+    .badge-dept {
+      background: var(--cc-indigo-light);
+      color: var(--cc-indigo);
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      margin-right: 4px;
+      margin-bottom: 4px;
+      display: inline-block;
+      font-size: 11px;
+    }
+
+    /* Tables */
+    .cc-table th {
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.8px;
+      color: var(--cc-slate-500);
+      padding: 16px 20px;
+      background: var(--cc-slate-100);
+      border: none;
+    }
+
+    .cc-table td {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--cc-slate-100);
+    }
+
+    @media(max-width: 991px) {
+      .cc-sidebar {
+        width: 100%;
+        position: relative;
+        min-height: auto;
+        padding: 20px;
+      }
+      .cc-main-content {
+        margin-left: 0;
+        padding: 20px;
+      }
+      .cc-admin-layout {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <%- include('../partials/flash') %>
+
+  <div class="cc-admin-layout">
+    <!-- Sidebar Menu -->
+    <div class="cc-sidebar">
+      <a class="cc-sidebar-brand" href="/">
+        <i class="bi bi-heart-pulse-fill"></i> CareConnect
+      </a>
+
+      <div class="cc-sidebar-menu">
+        <a href="/admin/dashboard" class="cc-sidebar-link">
+          <i class="bi bi-speedometer2"></i> Dashboard Overview
+        </a>
+        <a href="/admin/profile" class="cc-sidebar-link">
+          <i class="bi bi-person-circle"></i> Profile Setting
+        </a>
+        <a href="/admin/appointments" class="cc-sidebar-link">
+          <i class="bi bi-calendar2-check"></i> Appointments
+        </a>
+        <a href="/admin/doctors" class="cc-sidebar-link">
+          <i class="bi bi-person-badge"></i> Certified Doctors
+        </a>
+        <a href="/admin/patients" class="cc-sidebar-link">
+          <i class="bi bi-people"></i> Patients Ledger
+        </a>
+        <a href="/admin/clinics" class="cc-sidebar-link active">
+          <i class="bi bi-hospital"></i> Clinics Hub
+        </a>
+        <a href="/admin/feedback" class="cc-sidebar-link">
+          <i class="bi bi-star"></i> Feedback Reviews
+        </a>
+      </div>
+
+      <div class="pt-4 border-top border-slate-800" style="border-color: rgba(255,255,255,0.08)!important;">
+        <a href="/admin/logout" class="cc-sidebar-link" style="color:var(--cc-danger);">
+          <i class="bi bi-box-arrow-right"></i> System Sign Out
+        </a>
+      </div>
+    </div>
+
+    <!-- Main Content Panel -->
+    <div class="cc-main-content">
+      
+      <!-- Topbar Header -->
+      <div class="cc-topbar d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+          <h4 class="mb-0 fw-bold text-dark">Clinics Hub</h4>
+          <small class="text-muted">Register, edit, and overview medical clinics</small>
+        </div>
+
+        <div class="d-flex align-items-center gap-4">
+          <button class="btn btn-cc-primary d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#addClinicModal">
+            <i class="bi bi-plus-circle"></i> Register Clinic
+          </button>
+
+          <!-- Profile Dropdown -->
+          <div class="dropdown border-start ps-4">
+            <button class="btn d-flex align-items-center gap-3 border-0 bg-transparent p-0 dropdown-toggle"
+                    type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <img src="<%= admin.profilePicture || 'https://placehold.co/150x150?text=Admin' %>" alt="Admin Profile" class="cc-avatar-md">
+              <div class="text-start d-none d-md-block">
+                <h6 class="mb-0 text-dark fw-bold"><%= admin.adminName || 'Admin' %></h6>
+                <small class="text-muted"><%= admin.email %></small>
+              </div>
+              <i class="bi bi-chevron-down text-muted small ms-1"></i>
+            </button>
+
+            <ul class="dropdown-menu dropdown-menu-end shadow border-0 p-2 mt-2" style="border-radius:var(--radius-md);">
+              <li>
+                <a class="dropdown-item rounded py-2" href="/admin/profile">
+                  <i class="bi bi-person-circle me-2"></i> My Profile
+                </a>
+              </li>
+              <li>
+                <hr class="dropdown-divider">
+              </li>
+              <li>
+                <a class="dropdown-item rounded py-2 text-danger" href="/admin/logout">
+                  <i class="bi bi-box-arrow-right me-2"></i> Logout
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Clinics Table Ledger -->
+      <div class="cc-card p-0 overflow-hidden">
+        <div class="table-responsive">
+          <table class="table cc-table align-middle">
+            <thead>
+              <tr>
+                <th>Logo</th>
+                <th>Clinic Name</th>
+                <th>Contact Info</th>
+                <th>Address</th>
+                <th>Departments</th>
+                <th>Plan Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (clinics.length === 0) { %>
+                <tr>
+                  <td colspan="7" class="text-center py-5 text-muted">
+                    <i class="bi bi-hospital fs-1 mb-3 d-block text-slate-300"></i> No clinics found. Add your first clinic now!
+                  </td>
+                </tr>
+              <% } else { %>
+                <% clinics.forEach(clinic => { %>
+                  <tr>
+                    <td>
+                      <img src="<%= clinic.logo || 'https://placehold.co/150x150?text=Clinic' %>" alt="logo" class="cc-clinic-logo">
+                    </td>
+                    <td>
+                      <h6 class="mb-0 fw-bold text-dark"><%= clinic.clinicName %></h6>
+                    </td>
+                    <td>
+                      <div class="small text-dark fw-semibold"><i class="bi bi-envelope me-1 text-emerald"></i><%= clinic.email %></div>
+                      <div class="small text-muted"><i class="bi bi-telephone me-1 text-indigo"></i><%= clinic.phone || 'N/A' %></div>
+                    </td>
+                    <td>
+                      <span class="small text-muted"><%= clinic.address || 'N/A' %></span>
+                    </td>
+                    <td style="max-width: 200px;">
+                      <% if (clinic.departments && clinic.departments.length > 0) { %>
+                        <% clinic.departments.forEach(dept => { %>
+                          <span class="badge-dept"><%= dept %></span>
+                        <% }) %>
+                      <% } else { %>
+                        <span class="text-muted small">None</span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <span class="badge text-capitalize" style="background:var(--cc-indigo-light); color:var(--cc-indigo); font-weight:600;"><%= clinic.subscriptionPlan %></span>
+                    </td>
+                    <td>
+                      <div class="d-flex gap-2">
+                        <button class="btn btn-light btn-sm text-primary border" 
+                                data-bs-toggle="modal" 
+                                data-bs-target="#editClinicModal<%= clinic._id %>"
+                                title="Edit Clinic" style="border-radius:6px;">
+                          <i class="bi bi-pencil-square"></i>
+                        </button>
+                        <form action="/admin/clinics/delete/<%= clinic._id %>" method="POST" onsubmit="return confirm('Are you sure you want to delete this clinic?');" class="mb-0">
+                          <button type="submit" class="btn btn-light btn-sm text-danger border" title="Delete Clinic" style="border-radius:6px;">
+                            <i class="bi bi-trash"></i>
+                          </button>
+                        </form>
+                      </div>
+                    </td>
+                  </tr>
+
+                  <!-- Edit Clinic Modal -->
+                  <div class="modal fade" id="editClinicModal<%= clinic._id %>" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                      <div class="modal-content border-0 shadow" style="border-radius: var(--radius-xl);">
+                        <div class="modal-header border-0 pb-0">
+                          <h5 class="modal-title fw-bold text-dark">Edit Clinic Details</h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body p-4">
+                          <form action="/admin/clinics/edit/<%= clinic._id %>" method="POST" enctype="multipart/form-data">
+                            <div class="mb-3">
+                              <label class="form-label small fw-bold text-muted">Clinic Name</label>
+                              <input type="text" name="clinicName" class="form-control px-3" value="<%= clinic.clinicName %>" required style="border-radius: 10px;">
+                            </div>
+
+                            <div class="mb-3">
+                              <label class="form-label small fw-bold text-muted">Email Address</label>
+                              <input type="email" name="email" class="form-control px-3" value="<%= clinic.email %>" required style="border-radius: 10px;">
+                            </div>
+
+                            <div class="mb-3">
+                              <label class="form-label small fw-bold text-muted">Phone Number</label>
+                              <input type="text" name="phone" class="form-control px-3" value="<%= clinic.phone %>" style="border-radius: 10px;">
+                            </div>
+
+                            <div class="mb-3">
+                              <label class="form-label small fw-bold text-muted">Address</label>
+                              <textarea name="address" class="form-control px-3" rows="2" style="border-radius: 10px; height:auto;"><%= clinic.address %></textarea>
+                            </div>
+
+                            <div class="row mb-3">
+                              <div class="col-6">
+                                <label class="form-label small fw-bold text-muted">Latitude</label>
+                                <input type="number" step="any" name="latitude" class="form-control px-3" value="<%= clinic.location && clinic.location.coordinates ? clinic.location.coordinates[1] : '' %>" style="border-radius: 10px;" placeholder="e.g. 28.6139">
+                              </div>
+                              <div class="col-6">
+                                <label class="form-label small fw-bold text-muted">Longitude</label>
+                                <input type="number" step="any" name="longitude" class="form-control px-3" value="<%= clinic.location && clinic.location.coordinates ? clinic.location.coordinates[0] : '' %>" style="border-radius: 10px;" placeholder="e.g. 77.2090">
+                              </div>
+                            </div>
+
+                            <div class="mb-3">
+                              <label class="form-label small fw-bold text-muted">Departments (comma-separated)</label>
+                              <input type="text" name="departments" class="form-control px-3" value="<%= clinic.departments ? clinic.departments.join(', ') : '' %>" placeholder="Cardiology, Pediatrics, Dental..." style="border-radius: 10px;">
+                            </div>
+
+                            <div class="mb-3">
+                              <label class="form-label small fw-bold text-muted">Subscription Plan</label>
+                              <select name="subscriptionPlan" class="form-select px-3" style="border-radius: 10px;">
+                                <option value="free" <%= clinic.subscriptionPlan === 'free' ? 'selected' : '' %>>Free Plan</option>
+                                <option value="pro" <%= clinic.subscriptionPlan === 'pro' ? 'selected' : '' %>>Pro Plan</option>
+                                <option value="enterprise" <%= clinic.subscriptionPlan === 'enterprise' ? 'selected' : '' %>>Enterprise Plan</option>
+                              </select>
+                            </div>
+
+                            <div class="mb-4">
+                              <label class="form-label small fw-bold text-muted">Update Logo Image</label>
+                              <input type="file" name="logo" class="form-control" accept="image/*" style="border-radius: 10px;">
+                            </div>
+
+                            <button type="submit" class="btn btn-cc-primary w-100 py-3">Save Changes</button>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                <% }) %>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Clinic Modal -->
+  <div class="modal fade" id="addClinicModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow" style="border-radius: var(--radius-xl);">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title fw-bold text-dark">Register New Clinic</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <form action="/admin/clinics/add" method="POST" enctype="multipart/form-data">
+            <div class="mb-3">
+              <label class="form-label small fw-bold text-muted">Clinic Name</label>
+              <input type="text" name="clinicName" class="form-control px-3" placeholder="Enter clinic name" required style="border-radius: 10px;">
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-bold text-muted">Email Address</label>
+              <input type="email" name="email" class="form-control px-3" placeholder="Enter email" required style="border-radius: 10px;">
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-bold text-muted">Phone Number</label>
+              <input type="text" name="phone" class="form-control px-3" placeholder="Enter phone" style="border-radius: 10px;">
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-bold text-muted">Address</label>
+              <textarea name="address" class="form-control px-3" rows="2" placeholder="Enter clinic location address" style="border-radius: 10px; height:auto;"></textarea>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-6">
+                <label class="form-label small fw-bold text-muted">Latitude</label>
+                <input type="number" step="any" name="latitude" class="form-control px-3" style="border-radius: 10px;" placeholder="e.g. 28.6139">
+              </div>
+              <div class="col-6">
+                <label class="form-label small fw-bold text-muted">Longitude</label>
+                <input type="number" step="any" name="longitude" class="form-control px-3" style="border-radius: 10px;" placeholder="e.g. 77.2090">
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-bold text-muted">Departments (comma-separated)</label>
+              <input type="text" name="departments" class="form-control px-3" placeholder="Cardiology, Pediatrics, Dental..." style="border-radius: 10px;">
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-bold text-muted">Subscription Plan</label>
+              <select name="subscriptionPlan" class="form-select px-3" style="border-radius: 10px;">
+                <option value="free" selected>Free Plan</option>
+                <option value="pro">Pro Plan</option>
+                <option value="enterprise">Enterprise Plan</option>
+              </select>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label small fw-bold text-muted">Logo Image</label>
+              <input type="file" name="logo" class="form-control" accept="image/*" style="border-radius: 10px;">
+            </div>
+
+            <button type="submit" class="btn btn-cc-primary w-100 py-3">Add Clinic</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

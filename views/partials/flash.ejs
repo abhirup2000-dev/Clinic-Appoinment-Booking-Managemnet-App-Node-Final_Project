@@ -1,0 +1,136 @@
+<style>
+  /* ALERT SYSTEM (UNCHANGED) */
+  .alert-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .custom-alert {
+    min-width: 260px;
+    max-width: 320px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 14px;
+    border-radius: 14px;
+    font-size: 0.85rem;
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+    animation: slideIn 0.3s ease;
+  }
+
+  .alert-left {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .custom-alert.error {
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #f87171;
+  }
+
+  .custom-alert.success {
+    background: rgba(34, 197, 94, 0.12);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    color: #4ade80;
+  }
+
+  .alert-close {
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    opacity: 0.7;
+  }
+
+  .alert-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    width: 100%;
+    background: currentColor;
+    opacity: 0.4;
+    animation: shrink 4s linear forwards;
+  }
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateX(40px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes shrink {
+    from {
+      width: 100%;
+    }
+
+    to {
+      width: 0%;
+    }
+  }
+</style>
+
+<!-- ALERT -->
+<div class="alert-container">
+  <% if (typeof error !=="undefined" && error.length> 0) { %>
+    <div class="custom-alert error">
+      <div class="alert-left">
+        <i class="bi bi-exclamation-circle-fill"></i>
+        <span>
+          <%= error[0] %>
+        </span>
+      </div>
+      <button class="alert-close" onclick="dismissAlert(this)">
+        <i class="bi bi-x-lg"></i>
+      </button>
+      <div class="alert-bar"></div>
+    </div>
+    <% } %>
+
+      <% if (typeof success !=="undefined" && success.length> 0) { %>
+        <div class="custom-alert success">
+          <div class="alert-left">
+            <i class="bi bi-check-circle-fill"></i>
+            <span>
+              <%= success[0] %>
+            </span>
+          </div>
+          <button class="alert-close" onclick="dismissAlert(this)">
+            <i class="bi bi-x-lg"></i>
+          </button>
+          <div class="alert-bar"></div>
+        </div>
+        <% } %>
+</div>
+
+<script>
+  function dismissAlert(btn) {
+    const el = btn.closest(".custom-alert");
+    el.style.opacity = "0";
+    el.style.transform = "translateX(40px)";
+    setTimeout(() => el.remove(), 250);
+  }
+
+  setTimeout(() => {
+    document.querySelectorAll(".custom-alert").forEach(el => {
+      el.style.opacity = "0";
+      el.style.transform = "translateX(40px)";
+      setTimeout(() => el.remove(), 250);
+    });
+  }, 4000);
+</script>

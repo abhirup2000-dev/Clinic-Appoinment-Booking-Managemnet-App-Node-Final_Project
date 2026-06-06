@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About Us — CareConnect</title>
+  <meta name="description" content="Learn about CareConnect's mission, values, and our commitment to bringing premium, digital healthcare to patients everywhere.">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="/css/main.css">
+</head>
+<body>
+  <%- include('../partials/flash') %>
+
+  <%- include('../partials/navbar', { activePage: 'about' }) %>
+
+  <!-- Page Header -->
+  <section class="cc-page-header">
+    <div class="container position-relative" style="z-index:2;">
+      <div class="cc-breadcrumb">
+        <a href="/">Home</a>
+        <i class="bi bi-chevron-right" style="font-size:11px;"></i>
+        <span>About Us</span>
+      </div>
+      <h1 class="mb-3">Our Story & Mission</h1>
+      <p>Pioneering the future of patient care, clinician efficiency, and multi-specialty clinical synergy under a secure digital umbrella.</p>
+    </div>
+  </section>
+
+  <!-- Stats Bar -->
+  <section style="background: var(--cc-white); margin-top:-40px; position:relative; z-index:3;">
+    <div class="container">
+      <div class="row g-0" style="background:var(--cc-white); border-radius:var(--radius-xl); box-shadow:var(--shadow-lg); overflow:hidden;">
+        <div class="col-md-3 cc-stat" style="border-right:1px solid var(--cc-slate-200);">
+          <div class="cc-stat-number">10k+</div>
+          <div class="cc-stat-label">Happy Patients</div>
+        </div>
+        <div class="col-md-3 cc-stat" style="border-right:1px solid var(--cc-slate-200);">
+          <div class="cc-stat-number">50+</div>
+          <div class="cc-stat-label">Expert Doctors</div>
+        </div>
+        <div class="col-md-3 cc-stat" style="border-right:1px solid var(--cc-slate-200);">
+          <div class="cc-stat-number">15+</div>
+          <div class="cc-stat-label">Partner Clinics</div>
+        </div>
+        <div class="col-md-3 cc-stat">
+          <div class="cc-stat-number">15m</div>
+          <div class="cc-stat-label">Average Wait Time</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Mission & Vision -->
+  <section class="cc-section">
+    <div class="container">
+      <div class="row align-items-center g-5">
+        <div class="col-lg-6 cc-fade-left">
+          <span class="cc-badge cc-badge-emerald mb-3"><i class="bi bi-eye"></i> Our Vision</span>
+          <h2 class="cc-section-title mb-4">Patient-Centric Healthcare, Redefined</h2>
+          <p style="color:var(--cc-slate-500); line-height:1.8; font-size:16px;">
+            We believe that seeking medical advice should never be stressful. CareConnect was born out of a desire to eliminate long waiting queues, simplify clinician schedules, and introduce transparency into medical center ratings and services.
+          </p>
+          <p style="color:var(--cc-slate-500); line-height:1.8; font-size:16px;">
+            By integrating automated patient flow estimation, live queue alerts, and verified digital prescription systems, we guarantee an elite standard of healthcare that honors your time and guarantees compliance with global privacy benchmarks.
+          </p>
+          <div class="mt-4 d-flex gap-3 align-items-center">
+            <div class="cc-service-icon cc-service-icon-emerald mb-0" style="width:50px; height:50px; font-size:22px;">
+              <i class="bi bi-shield-check"></i>
+            </div>
+            <div>
+              <h6 class="fw-bold mb-1" style="color:var(--cc-slate-900);">HIPAA & PIPEDA Compliant</h6>
+              <p class="small mb-0" style="color:var(--cc-slate-500);">Your medical data is encrypted and secure at all times.</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-6 cc-fade-right">
+          <div class="position-relative">
+            <img src="https://images.unsplash.com/photo-1576091160621-2633005a3685?auto=format&fit=crop&w=700&q=80" 
+                 alt="Doctor analyzing medical records" class="img-fluid" style="border-radius:var(--radius-xl); box-shadow:var(--shadow-xl);">
+            <div class="position-absolute p-4 text-white" style="bottom:20px; left:20px; right:20px; background:rgba(15,23,42,0.85); backdrop-filter:blur(8px); border-radius:var(--radius-md);">
+              <h6 class="fw-bold mb-1"><i class="bi bi-quote me-2 text-emerald"></i>CareConnect Core Principle</h6>
+              <p class="small mb-0 opacity-75">"Empowering clinical decisions and giving patient autonomy via seamless digital interfaces."</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Core Values -->
+  <section class="cc-section cc-section-alt">
+    <div class="container">
+      <div class="text-center mb-5">
+        <span class="cc-badge cc-badge-indigo mb-3"><i class="bi bi-heart-fill"></i> Our Values</span>
+        <h2 class="cc-section-title">The CareConnect Pillars</h2>
+        <p class="cc-section-subtitle">We build tools that doctor clinics trust and patients love, guided by clear operational values.</p>
+      </div>
+
+      <div class="row g-4">
+        <!-- Integrity -->
+        <div class="col-lg-4 col-md-6 cc-fade-up" style="transition-delay:0s;">
+          <div class="cc-service-card">
+            <div class="cc-service-icon cc-service-icon-indigo"><i class="bi bi-hand-thumbs-up-fill"></i></div>
+            <h4 class="fw-bold mb-3" style="color:var(--cc-slate-900);">Absolute Integrity</h4>
+            <p style="color:var(--cc-slate-500); line-height:1.7; font-size:14px; margin-bottom:0;">
+              Every rating is audited. Every doctor is verified. Every medical review is generated by actual checked patients. No paid promotion, ever.
+            </p>
+          </div>
+        </div>
+
+        <!-- Excellence -->
+        <div class="col-lg-4 col-md-6 cc-fade-up" style="transition-delay:0.1s;">
+          <div class="cc-service-card">
+            <div class="cc-service-icon cc-service-icon-emerald"><i class="bi bi-gem"></i></div>
+            <h4 class="fw-bold mb-3" style="color:var(--cc-slate-900);">Clinical Excellence</h4>
+            <p style="color:var(--cc-slate-500); line-height:1.7; font-size:14px; margin-bottom:0;">
+              We partner with medical organizations equipped with modern facilities, certified specialists, and high clinical safety scores.
+            </p>
+          </div>
+        </div>
+
+        <!-- Innovation -->
+        <div class="col-lg-4 col-md-6 cc-fade-up" style="transition-delay:0.2s;">
+          <div class="cc-service-card">
+            <div class="cc-service-icon cc-service-icon-info"><i class="bi bi-cpu-fill"></i></div>
+            <h4 class="fw-bold mb-3" style="color:var(--cc-slate-900);">Modern Innovation</h4>
+            <p style="color:var(--cc-slate-500); line-height:1.7; font-size:14px; margin-bottom:0;">
+              From real-time WebSocket queues to automated chat support assistants, we bring state-of-the-art tech integrations to patient care.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Timeline / History -->
+  <section class="cc-section">
+    <div class="container">
+      <div class="text-center mb-5">
+        <span class="cc-badge cc-badge-emerald mb-3"><i class="bi bi-clock-history"></i> Timeline</span>
+        <h2 class="cc-section-title">Our Growth Story</h2>
+        <p class="cc-section-subtitle">How we scaled from a small local clinic pilot to an integrated multi-specialty clinical ecosystem.</p>
+      </div>
+
+      <div class="row justify-content-center">
+        <div class="col-lg-8">
+          <div class="position-relative ps-4" style="border-left: 2px solid var(--cc-slate-200);">
+            <!-- Timeline Item 1 -->
+            <div class="mb-5 position-relative cc-fade-up" style="transition-delay:0s;">
+              <div class="position-absolute" style="left:-25px; top:4px; width:10px; height:10px; border-radius:50%; background:var(--cc-emerald); box-shadow: 0 0 0 4px var(--cc-emerald-light);"></div>
+              <h5 class="fw-bold mb-1" style="color:var(--cc-slate-900);">Initial Launch & Pilot Program</h5>
+              <span class="text-muted small">Q1 2026</span>
+              <p class="mt-2" style="color:var(--cc-slate-500); font-size:14px;">
+                CareConnect launched its first module in 3 pilot clinics in Kolkata, testing patient booking flows, real-time wait queue estimation, and clinician dashboard integrations.
+              </p>
+            </div>
+
+            <!-- Timeline Item 2 -->
+            <div class="mb-5 position-relative cc-fade-up" style="transition-delay:0.1s;">
+              <div class="position-absolute" style="left:-25px; top:4px; width:10px; height:10px; border-radius:50%; background:var(--cc-indigo); box-shadow: 0 0 0 4px var(--cc-indigo-glow);"></div>
+              <h5 class="fw-bold mb-1" style="color:var(--cc-slate-900);">SaaS Portal & Audit Framework</h5>
+              <span class="text-muted small">Q2 2026</span>
+              <p class="mt-2" style="color:var(--cc-slate-500); font-size:14px;">
+                Opened the platform for Clinic Admins under subscription plans. Integrated rating feedback systems, patient surveys, and prescription workflows.
+              </p>
+            </div>
+
+            <!-- Timeline Item 3 -->
+            <div class="position-relative cc-fade-up" style="transition-delay:0.2s;">
+              <div class="position-absolute" style="left:-25px; top:4px; width:10px; height:10px; border-radius:50%; background:var(--cc-info); box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);"></div>
+              <h5 class="fw-bold mb-1" style="color:var(--cc-slate-900);">AI Support & Real-Time Sync</h5>
+              <span class="text-muted small">Q3 2026</span>
+              <p class="mt-2" style="color:var(--cc-slate-500); font-size:14px;">
+                Rolled out socket-enabled live booking push alerts, virtual support bot assistance, and digital payment decoupling to guarantee smooth UI flows across mobile and desktop.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cc-section cc-section-alt">
+    <div class="container text-center">
+      <h2 class="cc-section-title mb-3">Experience the CareConnect Difference</h2>
+      <p class="cc-section-subtitle mx-auto mb-4">Book your next consultation with our verified doctors in under 2 minutes.</p>
+      <a href="/patient/register-view" class="btn btn-cc-primary btn-lg px-5">
+        Book Appointment Now <i class="bi bi-arrow-right ms-2"></i>
+      </a>
+    </div>
+  </section>
+
+  <%- include('../partials/footer') %>
+  <%- include('../partials/chat-widget') %>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Scroll animations
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.cc-fade-up, .cc-fade-left, .cc-fade-right').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>

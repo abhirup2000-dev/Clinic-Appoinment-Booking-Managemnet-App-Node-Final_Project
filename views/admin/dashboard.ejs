@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard — CareConnect</title>
+  
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <!-- Premium Stylesheet -->
+  <link rel="stylesheet" href="/css/main.css">
+  
+  <style>
+    /* Admin Dashboard Custom Styles */
+    body {
+      background: var(--cc-slate-50);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    .cc-admin-layout {
+      display: flex;
+      width: 100%;
+    }
+
+    /* Sidebar Styling */
+    .cc-sidebar {
+      width: 280px;
+      background: linear-gradient(180deg, var(--cc-slate-900) 0%, var(--cc-slate-950) 100%);
+      color: var(--cc-white);
+      position: fixed;
+      top: 0; bottom: 0; left: 0;
+      padding: 30px 24px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .cc-sidebar-brand {
+      font-weight: 800;
+      font-size: 24px;
+      color: var(--cc-emerald) !important;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 40px;
+    }
+
+    .cc-sidebar-menu {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .cc-sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--cc-slate-400);
+      text-decoration: none;
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      font-size: 14.5px;
+      transition: all 0.3s var(--ease-smooth);
+    }
+
+    .cc-sidebar-link i {
+      font-size: 18px;
+    }
+
+    .cc-sidebar-link:hover {
+      color: var(--cc-white);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .cc-sidebar-link.active {
+      color: var(--cc-white);
+      background: linear-gradient(135deg, var(--cc-emerald), var(--cc-emerald-hover));
+      box-shadow: var(--shadow-emerald);
+    }
+
+    /* Main Content Styling */
+    .cc-main-content {
+      flex: 1;
+      margin-left: 280px;
+      padding: 40px;
+      min-width: 0; /* Prevents flex items from overflowing */
+    }
+
+    .cc-topbar {
+      background: var(--cc-white);
+      border-radius: var(--radius-xl);
+      padding: 20px 30px;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 40px;
+      border: 1px solid var(--cc-slate-200);
+    }
+
+    .cc-avatar-md {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--cc-slate-200);
+    }
+
+    /* Card Boxes */
+    .cc-stat-card {
+      border: none;
+      border-radius: var(--radius-xl);
+      padding: 24px;
+      color: white;
+      transition: all 0.3s var(--ease-smooth);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 140px;
+    }
+
+    .cc-stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .cc-stat-card::before {
+      content: '';
+      position: absolute;
+      top: -20%; right: -10%;
+      width: 120px; height: 120px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .cc-stat-card-blue { background: linear-gradient(135deg, var(--cc-indigo) 0%, #3b82f6 100%); box-shadow: var(--shadow-indigo); }
+    .cc-stat-card-emerald { background: linear-gradient(135deg, var(--cc-emerald) 0%, #10b981 100%); box-shadow: var(--shadow-emerald); }
+    .cc-stat-card-orange { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); box-shadow: 0 8px 24px rgba(245, 158, 11, 0.2); }
+    .cc-stat-card-rose { background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%); box-shadow: 0 8px 24px rgba(244, 63, 94, 0.2); }
+
+    /* Tables */
+    .cc-table th {
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.8px;
+      color: var(--cc-slate-500);
+      padding: 16px 20px;
+      background: var(--cc-slate-100);
+      border: none;
+    }
+
+    .cc-table td {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--cc-slate-100);
+    }
+
+    /* Notification Bell & Dropdown */
+    .notif-bell-wrapper {
+      position: relative;
+      cursor: pointer;
+    }
+    
+    .notif-bell-wrapper .badge {
+      position: absolute;
+      top: -5px; right: -8px;
+      font-size: 9px;
+      min-width: 18px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      animation: bellPulse 2s infinite;
+    }
+
+    @keyframes bellPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+    }
+
+    .notif-dropdown {
+      position: absolute;
+      top: 50px; right: 0;
+      width: 370px;
+      max-height: 440px;
+      background: var(--cc-white);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-xl);
+      z-index: 3000;
+      display: none;
+      overflow: hidden;
+      border: 1px solid var(--cc-slate-200);
+    }
+
+    .notif-dropdown.show { display: block; }
+    
+    .notif-dropdown-header {
+      padding: 16px 20px;
+      background: linear-gradient(135deg, var(--cc-emerald) 0%, var(--cc-emerald-hover) 100%);
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .notif-dropdown-body {
+      max-height: 340px;
+      overflow-y: auto;
+      padding: 8px 0;
+    }
+
+    .notif-dropdown-body::-webkit-scrollbar { width: 4px; }
+    .notif-dropdown-body::-webkit-scrollbar-thumb { background: var(--cc-slate-400); border-radius: 4px; }
+
+    .notif-item {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--cc-slate-100);
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      transition: background-color 0.2s;
+      cursor: pointer;
+    }
+
+    .notif-item:hover { background: #ecfdf5; }
+    .notif-item.unread { background: #ecfdf5; border-left: 3px solid var(--cc-emerald); }
+    
+    .notif-item .notif-icon {
+      width: 36px; height: 36px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; font-size: 16px;
+    }
+
+    .notif-icon.appointment { background: #dbeafe; color: #2563eb; }
+    .notif-icon.system { background: #f3e8ff; color: #7c3aed; }
+    .notif-icon.doctor { background: #d1fae5; color: #059669; }
+    .notif-icon.clinic { background: #fef3c7; color: #d97706; }
+    .notif-icon.payment { background: #fce7f3; color: #db2777; }
+    .notif-icon.feedback { background: #fff7ed; color: #ea580c; }
+    .notif-empty { text-align: center; padding: 40px 20px; color: var(--cc-slate-400); }
+
+    /* Live Toasts */
+    .live-toast-container {
+      position: fixed; top: 20px; right: 20px; z-index: 9999;
+      display: flex; flex-direction: column; gap: 10px; pointer-events: none;
+    }
+    
+    .live-toast {
+      pointer-events: auto; width: 360px;
+      background: rgba(255,255,255,0.98); backdrop-filter: blur(20px);
+      border-radius: var(--radius-lg); box-shadow: var(--shadow-xl);
+      border: 1px solid var(--cc-slate-200); padding: 16px 20px;
+      display: flex; gap: 14px; align-items: flex-start;
+      animation: toastSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      border-left: 4px solid var(--cc-emerald);
+    }
+
+    .live-toast.removing {
+      animation: toastSlideOut 0.4s cubic-bezier(0.55, 0, 1, 0.45) forwards;
+    }
+
+    @keyframes toastSlideIn {
+      from { transform: translateX(120%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes toastSlideOut {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(120%); opacity: 0; }
+    }
+
+    /* Badges */
+    .cc-badge-status {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .badge-success-glow { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+    .badge-primary-glow { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
+    .badge-warning-glow { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
+    .badge-danger-glow { background: #fdf2f2; color: #dc2626; border: 1px solid #fecdcd; }
+
+    @media(max-width: 991px) {
+      .cc-sidebar {
+        width: 100%;
+        position: relative;
+        min-height: auto;
+        padding: 20px;
+      }
+      .cc-main-content {
+        margin-left: 0;
+        padding: 20px;
+      }
+      .cc-admin-layout {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <%- include('../partials/flash') %>
+
+  <div class="cc-admin-layout">
+    <!-- Sidebar Menu -->
+    <div class="cc-sidebar">
+      <div class="sidebar-brand">
+      <div class="brand-icon">🏥</div>
+      <div>
+        <div class="brand-name">CareConnect</div>
+        <div class="brand-sub">Admin Panel</div>
+      </div>
+    </div>
+
+      <div class="cc-sidebar-menu">
+        <a href="/admin/dashboard" class="cc-sidebar-link active">
+          <i class="bi bi-speedometer2"></i> Dashboard Overview
+        </a>
+        <a href="/admin/profile" class="cc-sidebar-link">
+          <i class="bi bi-person-circle"></i> Profile Setting
+        </a>
+        <a href="/admin/appointments" class="cc-sidebar-link">
+          <i class="bi bi-calendar2-check"></i> Appointments
+        </a>
+        <a href="/admin/doctors" class="cc-sidebar-link">
+          <i class="bi bi-person-badge"></i> Certified Doctors
+        </a>
+        <a href="/admin/patients" class="cc-sidebar-link">
+          <i class="bi bi-people"></i> Patients Ledger
+        </a>
+        <a href="/admin/clinics" class="cc-sidebar-link">
+          <i class="bi bi-hospital"></i> Clinics Hub
+        </a>
+        <a href="/admin/feedback" class="cc-sidebar-link">
+          <i class="bi bi-star"></i> Feedback Reviews
+        </a>
+      </div>
+
+      <div class="pt-4 border-top border-slate-800" style="border-color: rgba(255,255,255,0.08)!important;">
+        <a href="/admin/logout" class="cc-sidebar-link" style="color:var(--cc-danger);">
+          <i class="bi bi-box-arrow-right"></i> System Sign Out
+        </a>
+      </div>
+    </div>
+
+    <!-- Main Content Panel -->
+    <div class="cc-main-content">
+      
+      <!-- Topbar Header -->
+      <div class="cc-topbar d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+          <h4 class="mb-0 fw-bold text-dark">Dashboard Overview</h4>
+          <small class="text-muted">Welcome back, <%= admin.adminName %> 👋</small>
+        </div>
+
+        <div class="d-flex align-items-center gap-4">
+          <!-- Notification Bell -->
+          <div class="notif-bell-wrapper" id="notifBellWrapper" onclick="toggleNotifPanel()">
+            <i class="bi bi-bell-fill fs-5 text-muted"></i>
+            <span class="badge bg-danger text-white" id="notifBadge" style="display:none;">0</span>
+          </div>
+
+          <!-- Notification Dropdown Panel -->
+          <div class="notif-dropdown" id="notifDropdown">
+            <div class="notif-dropdown-header">
+              <span class="fw-bold"><i class="bi bi-bell-fill me-2"></i>Notifications</span>
+              <button class="btn btn-sm btn-light text-primary fw-bold" style="border-radius:8px; font-size:11px;" onclick="markAllRead(event)">Mark all read</button>
+            </div>
+            <div class="notif-dropdown-body" id="notifDropdownBody">
+              <div class="notif-empty">
+                <i class="bi bi-bell-slash fs-2 d-block mb-2"></i>
+                No notifications yet
+              </div>
+            </div>
+          </div>
+
+          <!-- Profile Dropdown Menu -->
+          <div class="dropdown border-start ps-4">
+            <button class="btn d-flex align-items-center gap-3 border-0 bg-transparent p-0 dropdown-toggle"
+                    type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <img src="<%= admin.profilePicture || 'https://placehold.co/150x150?text=Admin' %>" alt="Admin Profile" class="cc-avatar-md">
+              <div class="text-start d-none d-md-block">
+                <h6 class="mb-0 text-dark fw-bold"><%= admin.adminName %></h6>
+                <small class="text-muted"><%= admin.email %></small>
+              </div>
+              <i class="bi bi-chevron-down text-muted small ms-1"></i>
+            </button>
+
+            <ul class="dropdown-menu dropdown-menu-end shadow border-0 p-2 mt-2" style="border-radius:var(--radius-md);">
+              <li>
+                <a class="dropdown-item rounded py-2" href="/admin/profile">
+                  <i class="bi bi-person-circle me-2"></i> My Profile
+                </a>
+              </li>
+              <li>
+                <hr class="dropdown-divider">
+              </li>
+              <li>
+                <a class="dropdown-item rounded py-2 text-danger" href="/admin/logout">
+                  <i class="bi bi-box-arrow-right me-2"></i> Logout
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Metrics Statistics Cards Grid -->
+      <div class="row g-4 mb-5">
+        <!-- Card 1: Appointments -->
+        <div class="col-md-6 col-lg-3">
+          <div class="cc-stat-card cc-stat-card-blue">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <small class="text-uppercase fw-bold opacity-75" style="font-size:10px; letter-spacing:0.8px;">Appointments</small>
+                <h2 class="fw-extrabold mt-2 mb-0"><%= appointmentsCount %></h2>
+              </div>
+              <i class="bi bi-calendar2-check-fill opacity-75 fs-3"></i>
+            </div>
+            <div class="small opacity-75 mt-3"><i class="bi bi-clock-history me-1"></i> All slots recorded</div>
+          </div>
+        </div>
+
+        <!-- Card 2: Doctors -->
+        <div class="col-md-6 col-lg-3">
+          <div class="cc-stat-card cc-stat-card-emerald">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <small class="text-uppercase fw-bold opacity-75" style="font-size:10px; letter-spacing:0.8px;">Doctors</small>
+                <h2 class="fw-extrabold mt-2 mb-0"><%= doctorsCount %></h2>
+              </div>
+              <i class="bi bi-person-badge-fill opacity-75 fs-3"></i>
+            </div>
+            <div class="small opacity-75 mt-3"><i class="bi bi-patch-check-fill me-1"></i> Board-certified clinicians</div>
+          </div>
+        </div>
+
+        <!-- Card 3: Patients -->
+        <div class="col-md-6 col-lg-3">
+          <div class="cc-stat-card cc-stat-card-orange">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <small class="text-uppercase fw-bold opacity-75" style="font-size:10px; letter-spacing:0.8px;">Patients</small>
+                <h2 class="fw-extrabold mt-2 mb-0"><%= patientsCount %></h2>
+              </div>
+              <i class="bi bi-people-fill opacity-75 fs-3"></i>
+            </div>
+            <div class="small opacity-75 mt-3"><i class="bi bi-heart-pulse-fill me-1"></i> Active checkup cases</div>
+          </div>
+        </div>
+
+        <!-- Card 4: Revenue -->
+        <div class="col-md-6 col-lg-3">
+          <div class="cc-stat-card cc-stat-card-rose">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <small class="text-uppercase fw-bold opacity-75" style="font-size:10px; letter-spacing:0.8px;">Total Revenue</small>
+                <h2 class="fw-extrabold mt-2 mb-0">₹<%= revenue.toFixed(2) %></h2>
+              </div>
+              <i class="bi bi-cash-stack opacity-75 fs-3"></i>
+            </div>
+            <div class="small opacity-75 mt-3"><i class="bi bi-credit-card-2-front-fill me-1"></i> Decoupled billing audits</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chart Analytics -->
+      <div class="row g-4 mb-5">
+        <div class="col-12">
+          <div class="cc-card p-4">
+            <h5 class="fw-bold mb-4 text-dark"><i class="bi bi-graph-up me-2 text-emerald"></i> Analytics Overview</h5>
+            <div style="height: 300px; position: relative;">
+              <canvas id="dashboardChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Appointments Ledger -->
+      <div class="cc-card p-0 overflow-hidden">
+        <div class="p-4 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <div class="d-flex align-items-center gap-2">
+            <span class="cc-badge cc-badge-emerald"><i class="bi bi-activity"></i> Active</span>
+            <h5 class="fw-bold mb-0 text-dark">Recent Consultations</h5>
+          </div>
+          <a href="/admin/appointments" class="btn btn-cc-primary btn-sm px-3">
+            <i class="bi bi-list-task me-1"></i> View All
+          </a>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table cc-table align-middle">
+            <thead>
+              <tr>
+                <th>Patient Name</th>
+                <th>Doctor Name</th>
+                <th>Schedule Date & Time Slot</th>
+                <th>Status Badge</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (recentAppointments && recentAppointments.length > 0) { %>
+                <% recentAppointments.forEach(appt => { %>
+                  <tr>
+                    <td>
+                      <h6 class="mb-0 fw-bold text-dark"><%= appt.patient ? appt.patient.name : 'Unknown Patient' %></h6>
+                    </td>
+                    <td>
+                      <span class="fw-semibold text-dark"><%= appt.doctor ? appt.doctor.name : 'Unassigned Doctor' %></span>
+                    </td>
+                    <td>
+                      <div class="fw-semibold text-dark">
+                        <%= new Date(appt.appointmentDate).toLocaleDateString("en-IN", { day: 'numeric', month: 'short', year: 'numeric' }) %>
+                      </div>
+                      <small class="text-muted"><i class="bi bi-clock me-1 text-emerald"></i><%= appt.appointmentTimeSlot %></small>
+                    </td>
+                    <td>
+                      <span class="cc-badge-status badge-<%= appt.status === 'completed' ? 'success' : appt.status === 'confirmed' ? 'primary' : appt.status === 'pending' ? 'warning' : 'danger' %>-glow">
+                        <%= appt.status %>
+                      </span>
+                    </td>
+                  </tr>
+                <% }) %>
+              <% } else { %>
+                <tr>
+                  <td colspan="4" class="text-center text-muted py-5">
+                    <i class="bi bi-journal-x fs-1 mb-2 d-block text-slate-300"></i> No consultations logged.
+                  </td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Socket.IO Client Scripts & Chart.js -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    const socket = io();
+    const ADMIN_ID = "<%= admin.userId %>";
+    socket.emit("join", ADMIN_ID);
+
+    // Initialize Chart.js
+    const ctx = document.getElementById('dashboardChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+        datasets: [{
+          label: 'Appointments',
+          data: [12, 19, 3, 5, 2, 3, <%= appointmentsCount %>],
+          borderColor: '#10b981',
+          backgroundColor: 'rgba(16, 185, 129, 0.1)',
+          tension: 0.4,
+          fill: true
+        }, {
+          label: 'Revenue (in K)',
+          data: [5, 12, 2, 4, 1, 2, <%= (revenue / 1000).toFixed(1) %>],
+          borderColor: '#6366f1',
+          backgroundColor: 'rgba(99, 102, 241, 0.1)',
+          tension: 0.4,
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'top' }
+        },
+        scales: {
+          y: { beginAtZero: true, grid: { borderDash: [5, 5] } },
+          x: { grid: { display: false } }
+        }
+      }
+    });
+
+    // Live toast container
+    const toastContainer = document.createElement("div");
+    toastContainer.className = "live-toast-container";
+    document.body.appendChild(toastContainer);
+
+    // Notification handler
+    socket.on("notification", (data) => {
+      showLiveToast(data.title, data.message, data.type || "system");
+      refreshNotifBell();
+    });
+
+    // Doctor updates
+    socket.on("doctor-availability", (data) => {
+      showLiveToast(data.title, data.message, "doctor");
+    });
+
+    // Clinic updates
+    socket.on("clinic-update", (data) => {
+      showLiveToast(data.title, data.message, "clinic");
+    });
+
+    // Render Toast Function
+    function showLiveToast(title, message, type = "system") {
+      const iconMap = {
+        appointment: "bi-calendar-check-fill",
+        system: "bi-shield-fill-check",
+        doctor: "bi-person-badge-fill",
+        clinic: "bi-hospital-fill",
+        payment: "bi-credit-card-fill",
+        feedback: "bi-star-fill",
+      };
+      const toast = document.createElement("div");
+      toast.className = "live-toast";
+      toast.innerHTML = `
+        <div class="notif-icon ${type}" style="width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i class="bi ${iconMap[type] || 'bi-bell-fill'}"></i>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <h6 style="margin:0;font-size:13px;font-weight:700;color:#1e293b;">${title}</h6>
+          <p style="margin:4px 0 0;font-size:11px;color:#64748b;line-height:1.4;">${message}</p>
+          <span style="font-size:9px;color:#94a3b8;">${new Date().toLocaleTimeString()}</span>
+        </div>
+        <button onclick="this.parentElement.classList.add('removing');setTimeout(()=>this.parentElement.remove(),400)" style="background:none;border:none;color:#94a3b8;cursor:pointer;font-size:18px;padding:0;line-height:1;">&times;</button>
+      `;
+      toastContainer.appendChild(toast);
+      
+      setTimeout(() => {
+        if (toast.parentElement) {
+          toast.classList.add("removing");
+          setTimeout(() => toast.remove(), 400);
+        }
+      }, 8000);
+      
+      while (toastContainer.children.length > 5) {
+        toastContainer.firstChild.remove();
+      }
+    }
+
+    // Toggle Notifications Bell dropdown
+    function toggleNotifPanel() {
+      const panel = document.getElementById("notifDropdown");
+      panel.classList.toggle("show");
+      if (panel.classList.contains("show")) loadNotifications();
+    }
+
+    document.addEventListener("click", (e) => {
+      const wrapper = document.getElementById("notifBellWrapper");
+      const panel = document.getElementById("notifDropdown");
+      if (wrapper && !wrapper.contains(e.target) && panel) panel.classList.remove("show");
+    });
+
+    async function loadNotifications() {
+      try {
+        const res = await fetch("/api/notifications", { headers: { "Content-Type": "application/json" } });
+        const result = await res.json();
+        const body = document.getElementById("notifDropdownBody");
+        if (!result.success || result.data.length === 0) {
+          body.innerHTML = '<div class="notif-empty"><i class="bi bi-bell-slash fs-2 d-block mb-2"></i>No notifications yet</div>';
+          return;
+        }
+        const iconMap = {
+          appointment: "bi-calendar-check-fill",
+          system: "bi-shield-fill-check",
+          doctor: "bi-person-badge-fill",
+          clinic: "bi-hospital-fill",
+          payment: "bi-credit-card-fill",
+          feedback: "bi-star-fill",
+        };
+        body.innerHTML = result.data.slice(0, 20).map(n => `
+          <div class="notif-item ${n.isRead ? '' : 'unread'}" onclick="markNotifRead('${n._id}', this)">
+            <div class="notif-icon ${n.type || 'system'}"><i class="bi ${iconMap[n.type] || 'bi-bell-fill'}"></i></div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:13px;font-weight:600;color:#1e293b;">${n.title}</div>
+              <div style="font-size:11px;color:#64748b;margin-top:2px;">${n.message}</div>
+              <div style="font-size:9px;color:#94a3b8;margin-top:4px;">${new Date(n.createdAt).toLocaleString()}</div>
+            </div>
+          </div>
+        `).join('');
+      } catch (err) { console.error("Load notifications error:", err); }
+    }
+
+    async function refreshNotifBell() {
+      try {
+        const res = await fetch("/api/notifications/unread-count");
+        const data = await res.json();
+        const badge = document.getElementById("notifBadge");
+        if (data.unreadCount > 0) {
+          badge.textContent = data.unreadCount > 99 ? "99+" : data.unreadCount;
+          badge.style.display = "flex";
+        } else {
+          badge.style.display = "none";
+        }
+      } catch (err) { console.error("Refresh bell error:", err); }
+    }
+
+    async function markNotifRead(id, el) {
+      try {
+        await fetch(`/api/notifications/${id}/read`, { method: "PUT" });
+        el.classList.remove("unread");
+        refreshNotifBell();
+      } catch (err) { console.error(err); }
+    }
+
+    async function markAllRead(e) {
+      e.stopPropagation();
+      try {
+        await fetch("/api/notifications/read-all", { method: "PUT" });
+        refreshNotifBell();
+        loadNotifications();
+      } catch (err) { console.error(err); }
+    }
+
+    // Initial check
+    refreshNotifBell();
+  </script>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

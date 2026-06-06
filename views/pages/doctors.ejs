@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Our Doctors — CareConnect</title>
+  <meta name="description" content="Meet our certified medical specialists. Browse doctors by specialization and book your appointment today.">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="/css/main.css">
+</head>
+<body>
+  <%- include('../partials/flash') %>
+
+  <%- include('../partials/navbar', { activePage: 'doctors' }) %>
+
+  <!-- Page Header -->
+  <section class="cc-page-header">
+    <div class="container position-relative" style="z-index:2;">
+      <div class="cc-breadcrumb">
+        <a href="/">Home</a>
+        <i class="bi bi-chevron-right" style="font-size:11px;"></i>
+        <span>Our Doctors</span>
+      </div>
+      <h1 class="mb-3">Our Certified Specialists</h1>
+      <p>Meet our elite team of board-certified medical practitioners ready to provide exceptional care.</p>
+    </div>
+  </section>
+
+  <!-- Filter Bar -->
+  <section style="background: var(--cc-white); margin-top:-30px; position:relative; z-index:3;">
+    <div class="container">
+      <div class="p-4" style="background:var(--cc-white); border-radius:var(--radius-xl); box-shadow:var(--shadow-lg);">
+        <div class="row g-3 align-items-center">
+          <div class="col-md-4">
+            <div class="input-group">
+              <span class="input-group-text border-0 bg-transparent"><i class="bi bi-search"></i></span>
+              <input type="text" id="doctorSearch" class="form-control border-0" placeholder="Search doctors by name..." 
+                     oninput="filterDoctors()" style="box-shadow:none;">
+            </div>
+          </div>
+          <div class="col-md-3">
+            <select id="specFilter" class="form-select" onchange="filterDoctors()" style="border-radius:var(--radius-md);">
+              <option value="">All Specializations</option>
+              <% 
+                const specs = [...new Set(doctors.map(d => d.specialization).filter(Boolean))];
+                specs.forEach(function(spec) { 
+              %>
+                <option value="<%= spec %>"><%= spec %></option>
+              <% }) %>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <select id="clinicFilter" class="form-select" onchange="filterDoctors()" style="border-radius:var(--radius-md);">
+              <option value="">All Clinics</option>
+              <% 
+                const clinicNames = [...new Set(doctors.map(d => d.clinic?.clinicName).filter(Boolean))];
+                clinicNames.forEach(function(cn) { 
+              %>
+                <option value="<%= cn %>"><%= cn %></option>
+              <% }) %>
+            </select>
+          </div>
+          <div class="col-md-2 text-end">
+            <span class="badge cc-badge-emerald" id="resultsCount" style="font-size:13px; padding:8px 14px;">
+              <%= doctors.length %> Doctors
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Doctors Grid -->
+  <section class="cc-section">
+    <div class="container">
+      <% if (doctors.length === 0) { %>
+        <div class="text-center py-5">
+          <i class="bi bi-person-badge" style="font-size:64px; color:var(--cc-slate-400);"></i>
+          <h4 class="mt-3 fw-bold" style="color:var(--cc-slate-700);">No Doctors Available Yet</h4>
+          <p class="text-muted">Our team is onboarding certified specialists. Check back soon!</p>
+        </div>
+      <% } else { %>
+        <div class="row g-4" id="doctorsGrid">
+          <% doctors.forEach(function(doctor, index) { %>
+            <div class="col-lg-3 col-md-6 doctor-item cc-fade-up"
+                 data-name="<%= doctor.name.toLowerCase() %>"
+                 data-spec="<%= doctor.specialization %>"
+                 data-clinic="<%= doctor.clinic?.clinicName || '' %>"
+                 style="transition-delay: <%= index * 0.08 %>s;">
+              <div class="cc-doctor-card h-100">
+                <div style="overflow:hidden;">
+                  <img src="<%= doctor.profilePicture || 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=400&q=80' %>" 
+                       class="cc-doctor-img" alt="<%= doctor.name %>">
+                </div>
+                <div class="p-4 text-center">
+                  <h5 class="fw-bold mb-1" style="color:var(--cc-slate-900); font-size:16px;"><%= doctor.name %></h5>
+                  <% if (doctor.specialization) { %>
+                    <span class="cc-badge cc-badge-indigo mb-2" style="font-size:10px;"><%= doctor.specialization %></span>
+                  <% } %>
+                  <% if (doctor.clinic && doctor.clinic.clinicName) { %>
+                    <p class="small mb-2" style="color:var(--cc-slate-500);">
+                      <i class="bi bi-hospital me-1" style="color:var(--cc-emerald);"></i> <%= doctor.clinic.clinicName %>
+                    </p>
+                  <% } %>
+                  <div class="d-flex justify-content-center gap-3 mb-3 small" style="color:var(--cc-slate-500);">
+                    <% if (doctor.experience) { %>
+                      <span><i class="bi bi-award me-1"></i><%= doctor.experience %> yrs</span>
+                    <% } %>
+                    <% if (doctor.consultationFee) { %>
+                      <span><i class="bi bi-currency-rupee"></i><%= doctor.consultationFee %></span>
+                    <% } %>
+                  </div>
+                  <div class="d-flex justify-content-center gap-1 mb-3" style="color:var(--cc-warning);">
+                    <i class="bi bi-star-fill" style="font-size:13px;"></i>
+                    <i class="bi bi-star-fill" style="font-size:13px;"></i>
+                    <i class="bi bi-star-fill" style="font-size:13px;"></i>
+                    <i class="bi bi-star-fill" style="font-size:13px;"></i>
+                    <i class="bi bi-star-fill" style="font-size:13px;"></i>
+                  </div>
+                  <a href="/patient/login-view" class="btn btn-cc-primary btn-sm w-100">
+                    <i class="bi bi-calendar-check me-1"></i> Book Appointment
+                  </a>
+                </div>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+      <% } %>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cc-section cc-section-alt">
+    <div class="container">
+      <div class="row align-items-center g-5">
+        <div class="col-lg-6 cc-fade-left">
+          <span class="cc-badge cc-badge-indigo mb-3"><i class="bi bi-person-check"></i> Join Our Team</span>
+          <h2 class="cc-section-title mb-3">Are You a Medical Professional?</h2>
+          <p style="color:var(--cc-slate-500); line-height:1.8;">
+            Join CareConnect's network of certified specialists. Manage your appointments, connect with patients, and grow your practice with our digital platform.
+          </p>
+          <a href="/doctor/login-view" class="btn btn-cc-outline btn-lg mt-2">
+            <i class="bi bi-person-badge me-2"></i> Join as Clinician
+          </a>
+        </div>
+        <div class="col-lg-6 cc-fade-right">
+          <img src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=700&q=80" 
+               alt="Medical Team" class="img-fluid" style="border-radius:var(--radius-xl); box-shadow:var(--shadow-xl);">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <%- include('../partials/footer') %>
+  <%- include('../partials/chat-widget') %>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Filter doctors
+    function filterDoctors() {
+      const search = document.getElementById('doctorSearch').value.toLowerCase();
+      const spec = document.getElementById('specFilter').value;
+      const clinic = document.getElementById('clinicFilter').value;
+      const items = document.querySelectorAll('.doctor-item');
+      let count = 0;
+      items.forEach(item => {
+        const matchName = !search || item.dataset.name.includes(search);
+        const matchSpec = !spec || item.dataset.spec === spec;
+        const matchClinic = !clinic || item.dataset.clinic === clinic;
+        if (matchName && matchSpec && matchClinic) {
+          item.style.display = '';
+          count++;
+        } else {
+          item.style.display = 'none';
+        }
+      });
+      document.getElementById('resultsCount').textContent = count + ' Doctor' + (count !== 1 ? 's' : '');
+    }
+
+    // Scroll animations
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.cc-fade-up, .cc-fade-left, .cc-fade-right').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>

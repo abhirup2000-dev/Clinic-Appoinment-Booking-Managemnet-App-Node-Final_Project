@@ -1,0 +1,1936 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Patient Portal — CareConnect</title>
+  <meta name="description"
+    content="Manage your appointments, book new consultations, and chat with your doctor on CareConnect.">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <!-- Socket.io -->
+  <script src="/socket.io/socket.io.js"></script>
+
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-light: #818cf8;
+      --primary-dark: #3730a3;
+      --accent: #10b981;
+      --accent-light: #6ee7b7;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --text: #1e293b;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --sidebar-w: 260px;
+      --radius: 14px;
+      --radius-sm: 8px;
+      --shadow: 0 4px 24px rgba(79, 70, 229, 0.08);
+      --shadow-md: 0 8px 32px rgba(79, 70, 229, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+    }
+    
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      width: var(--sidebar-w);
+      min-height: 100vh;
+      background: #1e1b4b;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1000;
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar-logo {
+      padding: 28px 24px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .sidebar-logo .brand {
+      font-size: 20px;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .sidebar-logo .brand i {
+      font-size: 22px;
+      color: var(--accent);
+    }
+
+    .sidebar-logo .brand span {
+      color: var(--accent);
+    }
+
+    /* Patient Info */
+    .sidebar-profile {
+      padding: 20px 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .profile-avatar {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid rgba(78, 70, 229, 0.5);
+    }
+
+    .profile-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: #f8fafc;
+      margin-bottom: 2px;
+    }
+
+    .profile-role {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    /* Nav Links */
+    .sidebar-nav {
+      flex: 1;
+      padding: 16px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      overflow-y: auto;
+    }
+
+    .nav-item-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.3);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 12px 8px 6px;
+    }
+
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 14px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.65);
+      text-decoration: none;
+      transition: all 0.2s;
+      cursor: pointer;
+      border: none;
+      background: none;
+      width: 100%;
+    }
+
+    .sidebar-link i {
+      font-size: 17px;
+      min-width: 20px;
+    }
+
+    .sidebar-link:hover,
+    .sidebar-link.active {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+    }
+
+    .sidebar-link.active {
+      background: rgba(79, 70, 229, 0.3);
+      color: #a5b4fc;
+    }
+
+    .sidebar-link.active i {
+      color: var(--primary-light);
+    }
+
+    .sidebar-footer {
+      padding: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .logout-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 14px;
+      border-radius: 10px;
+      background: rgba(239, 68, 68, 0.1);
+      color: #fca5a5;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .logout-btn:hover {
+      background: rgba(239, 68, 68, 0.2);
+      color: #fca5a5;
+    }
+
+    /* ===== MAIN CONTENT ===== */
+    .main-wrap {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Bar */
+    .topbar {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .topbar-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .notif-btn {
+      position: relative;
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 17px;
+      color: var(--muted);
+      transition: all 0.2s;
+    }
+
+    .notif-btn:hover {
+      background: var(--bg);
+    }
+
+    .notif-badge {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      width: 17px;
+      height: 17px;
+      border-radius: 50%;
+      background: var(--danger);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      display: none;
+    }
+
+    /* Notification Dropdown */
+    .notif-dropdown-menu {
+      width: 340px;
+      max-height: 400px;
+      overflow-y: auto;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+      padding: 0;
+    }
+
+    .notif-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--text);
+    }
+
+    .notif-entry {
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+      transition: background 0.15s;
+    }
+
+    .notif-entry:hover {
+      background: var(--bg);
+    }
+
+    .notif-entry:last-child {
+      border-bottom: none;
+    }
+
+    /* ===== PAGE PANELS ===== */
+    .page-panel {
+      display: none;
+      padding: 28px 32px;
+      flex: 1;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .page-panel.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ===== CARDS ===== */
+    .cc-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+
+    /* ===== HERO STATS ===== */
+    .hero-banner {
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      border-radius: var(--radius);
+      padding: 32px;
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+
+    .hero-banner::before {
+      content: '';
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.06);
+      top: -80px;
+      right: -60px;
+    }
+
+    .hero-banner::after {
+      content: '';
+      position: absolute;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.05);
+      bottom: -60px;
+      left: 40%;
+    }
+
+    .stat-card {
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      padding: 18px 24px;
+      text-align: center;
+      backdrop-filter: blur(6px);
+    }
+
+    .stat-num {
+      font-size: 28px;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.7);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-top: 4px;
+    }
+
+    /* ===== SECTION HEADERS ===== */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title i {
+      color: var(--primary);
+    }
+
+    /* ===== BOOKING FORM ===== */
+    .form-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+
+    .form-control,
+    .form-select {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+      background: #fff;
+      transition: all 0.2s;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+      outline: none;
+    }
+
+    .form-control:disabled,
+    .form-select:disabled {
+      background: #f8fafc;
+      color: var(--muted);
+    }
+
+    textarea.form-control {
+      height: auto;
+      resize: vertical;
+    }
+
+    /* Stepper */
+    .stepper {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin-bottom: 28px;
+    }
+
+    .step-dot {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--muted);
+      transition: all 0.3s;
+      position: relative;
+      z-index: 2;
+      flex-shrink: 0;
+    }
+
+    .step-dot.active {
+      border-color: var(--primary);
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15);
+    }
+
+    .step-dot.done {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .step-line {
+      flex: 1;
+      height: 2px;
+      background: var(--border);
+      transition: background 0.3s;
+    }
+
+    .step-line.done {
+      background: var(--accent);
+    }
+
+    .step-pane {
+      display: none;
+      animation: fadeIn 0.25s ease;
+    }
+
+    .step-pane.active {
+      display: block;
+    }
+
+    /* Buttons */
+    .btn-primary-cc {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 10px 22px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-primary-cc:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(79, 70, 229, 0.35);
+    }
+
+    .btn-primary-cc:disabled {
+      opacity: 0.6;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .btn-outline-cc {
+      background: transparent;
+      color: var(--primary);
+      border: 1px solid var(--primary);
+      border-radius: var(--radius-sm);
+      padding: 9px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-outline-cc:hover {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .btn-success-cc {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 10px 22px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-success-cc:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
+    }
+
+    /* ===== APPOINTMENT CARDS ===== */
+    .appt-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      transition: all 0.25s;
+      position: relative;
+    }
+
+    .appt-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+      border-color: #c7d2fe;
+    }
+
+    .appt-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      border-radius: var(--radius) 0 0 var(--radius);
+    }
+
+    .appt-card[data-status="pending"]::before {
+      background: var(--warning);
+    }
+
+    .appt-card[data-status="confirmed"]::before {
+      background: var(--primary);
+    }
+
+    .appt-card[data-status="completed"]::before {
+      background: var(--accent);
+    }
+
+    .appt-card[data-status="cancelled"]::before {
+      background: var(--danger);
+    }
+
+    .status-pill {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 100px;
+      text-transform: capitalize;
+      letter-spacing: 0.4px;
+    }
+
+    .status-pending {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .status-confirmed {
+      background: #ede9fe;
+      color: #4c1d95;
+    }
+
+    .status-completed {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .status-cancelled {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .doctor-chip {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .doctor-chip img {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--border);
+    }
+
+    .doc-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .doc-spec {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .appt-meta {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .appt-meta i {
+      color: var(--primary);
+    }
+
+    .prescription-box {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 13px;
+    }
+
+    /* Filter Tabs */
+    .filter-tabs {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .filter-tab {
+      padding: 5px 14px;
+      border-radius: 100px;
+      border: 1px solid var(--border);
+      background: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .filter-tab.active,
+    .filter-tab:hover {
+      border-color: var(--primary);
+      background: var(--primary);
+      color: #fff;
+    }
+
+    /* ===== CHAT PANEL ===== */
+    .chat-list-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.15s;
+      text-decoration: none;
+    }
+
+    .chat-list-item:hover {
+      background: #f8fafc;
+    }
+
+    .chat-list-item img {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--border);
+    }
+
+    .chat-doc-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .chat-appt-info {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .online-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #94a3b8;
+      border: 2px solid #fff;
+      position: absolute;
+      bottom: 1px;
+      right: 1px;
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 52px 20px;
+      color: var(--muted);
+    }
+
+    .empty-state i {
+      font-size: 48px;
+      color: #cbd5e1;
+      display: block;
+      margin-bottom: 12px;
+    }
+
+    .empty-state p {
+      font-size: 15px;
+      margin-bottom: 16px;
+    }
+
+    /* Toast */
+    #toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .toast-msg {
+      background: var(--text);
+      color: #fff;
+      padding: 13px 20px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      animation: slideIn 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .toast-msg.success {
+      background: #059669;
+    }
+
+    .toast-msg.error {
+      background: #dc2626;
+    }
+
+    .toast-msg.info {
+      background: #4f46e5;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(40px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    /* Responsive Mobile Toggle */
+    .sidebar-toggle {
+      display: none;
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 18px;
+      color: var(--muted);
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .sidebar-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: 999;
+      }
+
+      .sidebar-overlay.show {
+        display: block;
+      }
+
+      .main-wrap {
+        margin-left: 0;
+      }
+
+      .sidebar-toggle {
+        display: flex;
+      }
+
+      .page-panel {
+        padding: 20px 16px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <%- include('../partials/flash') %>
+
+  <!-- Sidebar Overlay (mobile) -->
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar" id="sidebar">
+    <!-- Logo -->
+    <div class="sidebar-logo">
+      <a href="/patient/dashboard" class="brand">
+        <i class="bi bi-heart-pulse-fill"></i>
+        Care<span>Connect</span>
+      </a>
+    </div>
+
+    <!-- Patient Profile Snippet -->
+    <div class="sidebar-profile">
+      <div class="d-flex align-items-center gap-3">
+        <img
+          src="<%= patient.profilePicture || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(patient.name) + '&background=4f46e5&color=fff&size=150' %>"
+          alt="Patient Avatar" class="profile-avatar">
+        <div>
+          <div class="profile-name">
+            <%= patient.name %>
+          </div>
+          <div class="profile-role">Patient</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nav -->
+    <nav class="sidebar-nav">
+      <div class="nav-item-label">Dashboard</div>
+      <button class="sidebar-link active" id="nav-overview" onclick="showPanel('overview')">
+        <i class="bi bi-grid-fill"></i> Overview
+      </button>
+
+      <div class="nav-item-label">Appointments</div>
+      <button class="sidebar-link" id="nav-book" onclick="showPanel('book')">
+        <i class="bi bi-calendar-plus-fill"></i> Book Appointment
+      </button>
+      <button class="sidebar-link" id="nav-appointments" onclick="showPanel('appointments')">
+        <i class="bi bi-clock-history"></i> My Appointments
+      </button>
+
+      <div class="nav-item-label">Communication</div>
+      <button class="sidebar-link" id="nav-chat" onclick="showPanel('chat')">
+        <i class="bi bi-chat-dots-fill"></i> Chat with Doctor
+      </button>
+    </nav>
+
+    <!-- Logout -->
+    <div class="sidebar-footer">
+      <a href="/patient/logout" class="logout-btn">
+        <i class="bi bi-box-arrow-left"></i> Logout
+      </a>
+    </div>
+  </aside>
+
+  <!-- ===== MAIN WRAP ===== -->
+  <div class="main-wrap">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="d-flex align-items-center gap-3">
+        <div class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()">
+          <i class="bi bi-list"></i>
+        </div>
+        <div class="topbar-title" id="topbarTitle">Overview</div>
+      </div>
+      <div class="topbar-right">
+        <!-- Notifications -->
+        <div class="dropdown">
+          <div class="notif-btn" id="notifBtn" data-bs-toggle="dropdown">
+            <i class="bi bi-bell-fill"></i>
+            <span class="notif-badge" id="notifBadge">0</span>
+          </div>
+          <div class="dropdown-menu notif-dropdown-menu" id="notifDropdown" aria-labelledby="notifBtn">
+            <div class="notif-header">
+              <i class="bi bi-bell me-2"></i>Notifications
+            </div>
+            <div id="notifList">
+              <div class="text-center py-4 text-muted" id="noNotifMsg" style="font-size:13px;">
+                <i class="bi bi-bell-slash d-block fs-4 mb-2" style="color:#cbd5e1;"></i>
+                No new notifications
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <img
+          src="<%= patient.profilePicture || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(patient.name) + '&background=4f46e5&color=fff&size=80' %>"
+          alt="Avatar" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid #e0e7ff;">
+      </div>
+    </header>
+
+    <!-- PANEL: OVERVIEW -->
+    <section class="page-panel active" id="panel-overview">
+
+      <!-- Hero Banner -->
+      <div class="hero-banner">
+        <div class="row align-items-center g-3">
+          <div class="col-md-7">
+            <p class="mb-1"
+              style="font-size:13px;opacity:.7;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Welcome
+              back</p>
+            <h2 style="font-size:26px;font-weight:800;color:#fff;margin-bottom:6px;">
+              Hello, <%= patient.name %>! 👋
+            </h2>
+            <p style="font-size:14px;color:rgba(255,255,255,0.75);margin:0;">
+              Manage your appointments, view prescriptions, and chat with your doctor — all in one place.
+            </p>
+            <div class="mt-4 d-flex gap-3 flex-wrap">
+              <button class="btn-primary-cc"
+                style="background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);"
+                onclick="showPanel('book')">
+                <i class="bi bi-calendar-plus"></i> Book Appointment
+              </button>
+              <button class="btn-outline-cc" style="border-color:rgba(255,255,255,0.4);color:#fff;"
+                onclick="showPanel('appointments')">
+                <i class="bi bi-clock-history"></i> View My Appointments
+              </button>
+            </div>
+          </div>
+          <div class="col-md-5">
+            <div class="row g-3">
+              <div class="col-6">
+                <div class="stat-card">
+                  <div class="stat-num">
+                    <%= appointments.length %>
+                  </div>
+                  <div class="stat-label">Total</div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="stat-card">
+                  <div class="stat-num">
+                    <%= appointments.filter(a=> a.status === 'confirmed').length %>
+                  </div>
+                  <div class="stat-label">Confirmed</div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="stat-card">
+                  <div class="stat-num">
+                    <%= appointments.filter(a=> a.status === 'pending').length %>
+                  </div>
+                  <div class="stat-label">Pending</div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="stat-card">
+                  <div class="stat-num">
+                    <% const freeRemaining = Math.max(0, 2 - patient.freeAppointmentsUsed); %>
+                    <%= freeRemaining %>
+                  </div>
+                  <div class="stat-label">Free Left</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Upcoming -->
+      <div class="section-header">
+        <div class="section-title">
+          <i class="bi bi-lightning-fill"></i> Recent Appointments
+        </div>
+        <button class="btn-outline-cc" style="padding:6px 14px;font-size:13px;" onclick="showPanel('appointments')">
+          View All <i class="bi bi-arrow-right"></i>
+        </button>
+      </div>
+
+      <% const recent=appointments.slice(0, 3); %>
+        <% if (recent.length===0) { %>
+          <div class="cc-card">
+            <div class="empty-state">
+              <i class="bi bi-calendar-x"></i>
+              <p>No appointments yet. Book your first consultation!</p>
+              <button class="btn-primary-cc" onclick="showPanel('book')">
+                <i class="bi bi-calendar-plus"></i> Book Now
+              </button>
+            </div>
+          </div>
+          <% } else { %>
+            <div class="d-flex flex-column gap-3">
+              <% recent.forEach(appt=> { %>
+                <div class="appt-card" data-status="<%= appt.status %>">
+                  <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+                    <div class="doctor-chip">
+                      <img
+                        src="<%= appt.doctor.profilePicture || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(appt.doctor.name || 'Dr') + '&background=4f46e5&color=fff&size=80' %>"
+                        alt="Doctor">
+                      <div>
+                        <div class="doc-name"><%= appt.doctor.name %>
+                        </div>
+                        <div class="doc-spec">
+                          <%= appt.doctor.specialization %>
+                        </div>
+                      </div>
+                    </div>
+                    <span class="status-pill status-<%= appt.status %>">
+                      <%= appt.status %>
+                    </span>
+                  </div>
+                  <div class="d-flex flex-wrap gap-3">
+                    <div class="appt-meta">
+                      <i class="bi bi-calendar-event"></i>
+                      <%= new Date(appt.appointmentDate).toLocaleDateString('en-IN', { day: 'numeric' , month: 'short' ,
+                        year: 'numeric' }) %>
+                    </div>
+                    <div class="appt-meta">
+                      <i class="bi bi-clock"></i>
+                      <%= appt.appointmentTimeSlot %>
+                    </div>
+                    <div class="appt-meta">
+                      <i class="bi bi-hospital"></i>
+                      <%= appt.clinic.clinicName %>
+                    </div>
+                  </div>
+                </div>
+                <% }) %>
+            </div>
+            <% } %>
+    </section>
+
+    <!-- PANEL: BOOK APPOINTMENT -->
+    <section class="page-panel" id="panel-book">
+      <div class="row justify-content-center">
+        <div class="col-lg-7 col-xl-6">
+          <div class="cc-card p-4">
+            <div class="mb-4">
+              <h4 style="font-weight:800;color:var(--text);margin-bottom:4px;">
+                <i class="bi bi-calendar-plus-fill" style="color:var(--primary);margin-right:8px;"></i>Book an
+                Appointment
+              </h4>
+              <p style="font-size:13px;color:var(--muted);margin:0;">Fill out the form below to schedule a consultation
+                with a specialist.</p>
+            </div>
+
+            <!-- Stepper Header -->
+            <div class="stepper mb-4">
+              <div class="step-dot active" id="s1">1</div>
+              <div class="step-line" id="line1"></div>
+              <div class="step-dot" id="s2">2</div>
+              <div class="step-line" id="line2"></div>
+              <div class="step-dot" id="s3">3</div>
+            </div>
+
+            <form id="bookingForm" action="/patient/appointments/book" method="POST">
+
+              <!-- STEP 1: Clinic & Department -->
+              <div class="step-pane active" id="pane1">
+                <h6 style="font-weight:700;margin-bottom:16px;color:var(--text);">
+                  Step 1 — Select Clinic & Department
+                </h6>
+
+                <div class="mb-3 position-relative">
+                  <label class="form-label" for="clinicSearch">Clinic Center</label>
+                  <input type="text" id="clinicSearch" class="form-control" placeholder="Search clinic by name..." autocomplete="off" required>
+                  
+                  <input type="hidden" id="clinicSelect" name="clinic" required>
+                  
+                  <!-- Search Results -->
+                  <div id="clinicResults" class="list-group position-absolute w-100 shadow-sm" style="z-index:1000; max-height:250px; overflow-y:auto; display:none;"></div>
+                </div>
+
+                <div class="mb-4">
+                  <label class="form-label" for="deptSelect">Medical Department</label>
+                  <select id="deptSelect" name="department" class="form-select" required disabled
+                    onchange="loadDoctors()">
+                    <option value="" disabled selected>— Choose Clinic First —</option>
+                  </select>
+                  <div id="deptSpinner" class="d-none mt-2" style="font-size:12px;color:var(--muted);">
+                    <span class="spinner-border spinner-border-sm me-1"></span> Loading departments...
+                  </div>
+                </div>
+
+                <div class="d-flex justify-content-end">
+                  <button type="button" class="btn-primary-cc" onclick="goStep(2)">
+                    Next <i class="bi bi-arrow-right"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- STEP 2: Doctor, Date & Slot -->
+              <div class="step-pane" id="pane2">
+                <h6 style="font-weight:700;margin-bottom:16px;color:var(--text);">
+                  Step 2 — Choose Doctor & Time
+                </h6>
+
+                <div class="mb-3">
+                  <label class="form-label" for="doctorSelect">Specialist Doctor</label>
+                  <select id="doctorSelect" name="doctor" class="form-select" required disabled onchange="checkSlots()">
+                    <option value="" disabled selected>— Choose Department First —</option>
+                  </select>
+                  <div id="docSpinner" class="d-none mt-2" style="font-size:12px;color:var(--muted);">
+                    <span class="spinner-border spinner-border-sm me-1"></span> Loading doctors...
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-sm-6 mb-3">
+                    <label class="form-label" for="apptDate">Consultation Date</label>
+                    <input type="date" id="apptDate" name="appointmentDate" class="form-control" required
+                      min="<%= new Date().toISOString().split('T')[0] %>" onchange="checkSlots()">
+                  </div>
+                  <div class="col-sm-6 mb-3">
+                    <label class="form-label" for="slotSelect">Time Slot</label>
+                    <select id="slotSelect" name="appointmentTimeSlot" class="form-select" required disabled>
+                      <option value="" disabled selected>— Pick Date & Doctor —</option>
+                    </select>
+                    <div id="slotSpinner" class="d-none mt-2" style="font-size:12px;color:var(--muted);">
+                      <span class="spinner-border spinner-border-sm me-1"></span> Fetching slots...
+                    </div>
+                  </div>
+                </div>
+
+                <div class="d-flex justify-content-between mt-2">
+                  <button type="button" class="btn-outline-cc" onclick="goStep(1)">
+                    <i class="bi bi-arrow-left"></i> Back
+                  </button>
+                  <button type="button" class="btn-primary-cc" onclick="goStep(3)">
+                    Next <i class="bi bi-arrow-right"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- STEP 3: Symptoms & Confirm -->
+              <div class="step-pane" id="pane3">
+                <h6 style="font-weight:700;margin-bottom:16px;color:var(--text);">
+                  Step 3 — Describe Symptoms & Confirm
+                </h6>
+
+                <!-- Summary Card -->
+                <div id="bookingSummary"
+                  style="background:#f8fafc;border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:16px;font-size:13px;">
+                </div>
+
+                <div class="mb-4">
+                  <label class="form-label" for="symptoms">Symptoms / Reason for Visit (optional)</label>
+                  <textarea id="symptoms" name="symptoms" class="form-control" rows="4"
+                    placeholder="E.g. persistent headache, high fever, chest discomfort..."></textarea>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                  <button type="button" class="btn-outline-cc" onclick="goStep(2)">
+                    <i class="bi bi-arrow-left"></i> Back
+                  </button>
+                  <button type="submit" class="btn-success-cc" id="confirmBtn">
+                    <span id="confirmSpinner" class="spinner-border spinner-border-sm d-none"></span>
+                    <i class="bi bi-check-circle"></i> Confirm Booking
+                  </button>
+                </div>
+              </div>
+
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL: MY APPOINTMENTS -->
+    <section class="page-panel" id="panel-appointments">
+
+      <!-- Filter Tabs -->
+      <div class="section-header mb-3">
+        <div class="section-title">
+          <i class="bi bi-clock-history"></i> My Appointments
+        </div>
+        <div class="filter-tabs">
+          <button class="filter-tab active" onclick="filterAppts('all', this)">All (<%= appointments.length %>)</button>
+          <button class="filter-tab" onclick="filterAppts('pending', this)">Pending</button>
+          <button class="filter-tab" onclick="filterAppts('confirmed', this)">Confirmed</button>
+          <button class="filter-tab" onclick="filterAppts('completed', this)">Completed</button>
+          <button class="filter-tab" onclick="filterAppts('cancelled', this)">Cancelled</button>
+        </div>
+      </div>
+
+      <% if (appointments.length===0) { %>
+        <div class="cc-card">
+          <div class="empty-state">
+            <i class="bi bi-calendar-x"></i>
+            <p>You haven't booked any appointments yet.</p>
+            <button class="btn-primary-cc" onclick="showPanel('book')">
+              <i class="bi bi-calendar-plus"></i> Book Now
+            </button>
+          </div>
+        </div>
+        <% } else { %>
+          <div class="d-flex flex-column gap-3" id="apptList">
+            <% appointments.forEach(appt=> { %>
+              <div class="appt-card" data-status="<%= appt.status %>" data-card-status="<%= appt.status %>">
+
+                <!-- Header Row -->
+                <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
+                  <div class="doctor-chip">
+                    <img
+                      src="<%= appt.doctor.profilePicture || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(appt.doctor.name || 'Dr') + '&background=4f46e5&color=fff&size=80' %>"
+                      alt="Doctor">
+                    <div>
+                      <div class="doc-name">Dr. <%= appt.doctor.name %>
+                      </div>
+                      <div class="doc-spec">
+                        <%= appt.doctor.specialization %>
+                      </div>
+                    </div>
+                  </div>
+                  <span class="status-pill status-<%= appt.status %>">
+                    <% if (appt.status==='pending' ) { %><i class="bi bi-hourglass-split me-1"></i>
+                      <% } else if (appt.status==='confirmed' ) { %><i class="bi bi-check-circle-fill me-1"></i>
+                        <% } else if (appt.status==='completed' ) { %><i class="bi bi-patch-check-fill me-1"></i>
+                          <% } else { %><i class="bi bi-x-circle-fill me-1"></i>
+                            <% } %>
+                              <%= appt.status.charAt(0).toUpperCase() + appt.status.slice(1) %>
+                  </span>
+                </div>
+
+                <!-- Meta Row -->
+                <div class="d-flex flex-wrap gap-3 mb-3">
+                  <div class="appt-meta">
+                    <i class="bi bi-calendar-event"></i>
+                    <%= new Date(appt.appointmentDate).toLocaleDateString('en-IN', { weekday: 'short' , day: 'numeric' ,
+                      month: 'short' , year: 'numeric' }) %>
+                  </div>
+                  <div class="appt-meta">
+                    <i class="bi bi-clock"></i>
+                    <%= appt.appointmentTimeSlot %>
+                  </div>
+                  <div class="appt-meta">
+                    <i class="bi bi-hospital"></i>
+                    <%= appt.clinic.clinicName %>
+                  </div>
+                  <div class="appt-meta">
+                    <i class="bi bi-geo-alt"></i>
+                    <%= appt.clinic.address %>
+                  </div>
+                </div>
+
+                <!-- Department -->
+                <div class="mb-3">
+                  <span
+                    style="background:#ede9fe;color:#5b21b6;font-size:11px;font-weight:700;padding:4px 12px;border-radius:100px;">
+                    <i class="bi bi-diagram-3 me-1"></i>
+                    <%= appt.department %>
+                  </span>
+                </div>
+
+                <!-- Symptoms -->
+                <% if (appt.symptoms) { %>
+                  <div
+                    style="background:#f8fafc;border-left:3px solid var(--primary);padding:10px 14px;border-radius:0 8px 8px 0;font-size:13px;margin-bottom:12px;">
+                    <strong
+                      style="color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:0.5px;">Reported
+                      Symptoms</strong>
+                    <p style="margin:4px 0 0;color:var(--text);">
+                      <%= appt.symptoms %>
+                    </p>
+                  </div>
+                  <% } %>
+
+                    <!-- Prescription -->
+                    <% if (appt.prescription) { %>
+                      <div class="prescription-box mb-3">
+                        <div
+                          style="font-size:11px;font-weight:700;color:#059669;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">
+                          <i class="bi bi-prescription me-1"></i>Prescription Notes
+                        </div>
+                        <p style="margin:0;color:var(--text);font-size:13px;">
+                          <%= appt.prescription %>
+                        </p>
+                      </div>
+                      <% } %>
+
+                        <!-- Actions -->
+                        <% if (appt.status==='completed' || appt.status==='confirmed' ) { %>
+                          <div class="d-flex gap-2 flex-wrap mt-2">
+                            <a href="/patient/live-chat/<%= appt._id %>" class="btn-outline-cc"
+                              style="font-size:13px;padding:8px 16px;text-decoration:none;">
+                              <i class="bi bi-chat-dots-fill"></i> Chat with Doctor
+                            </a>
+                            <% if (appt.status==='completed' && !feedbackedApptIds.includes(appt._id.toString())) { %>
+                              <button class="btn-primary-cc" style="font-size:13px;padding:8px 16px;"
+                                data-bs-toggle="modal" data-bs-target="#feedbackModal<%= appt._id %>">
+                                <i class="bi bi-star-fill"></i> Leave Review
+                              </button>
+                              <% } else if (appt.status==='completed' ) { %>
+                                <button class="btn-success-cc"
+                                  style="font-size:13px;padding:8px 16px;opacity:0.7;cursor:default;" disabled>
+                                  <i class="bi bi-check-circle-fill"></i> Review Submitted
+                                </button>
+                                <% } %>
+                                
+                            <% if (appt.paymentStatus === 'paid') { %>
+                              <a href="/patient/invoice/<%= appt._id %>" class="btn-primary-cc"
+                                style="font-size:13px;padding:8px 16px;text-decoration:none;">
+                                <i class="bi bi-file-earmark-pdf-fill"></i> Download Invoice
+                              </a>
+                            <% } %>
+                            
+                            <% if (appt.medicalReport) { %>
+                              <a href="/patient/report/<%= appt._id %>" class="btn-success-cc"
+                                style="font-size:13px;padding:8px 16px;text-decoration:none;">
+                                <i class="bi bi-file-medical-fill"></i> Download Report
+                              </a>
+                            <% } %>
+                          </div>
+                          <% } %>
+
+              </div>
+
+              <!-- Feedback Modal -->
+              <% if (appt.status==='completed' && !feedbackedApptIds.includes(appt._id.toString())) { %>
+                <div class="modal fade" id="feedbackModal<%= appt._id %>" tabindex="-1" aria-hidden="true">
+                  <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content border-0"
+                      style="border-radius:var(--radius);box-shadow:0 20px 60px rgba(0,0,0,0.18);">
+                      <div class="modal-header border-0 pb-0 px-4 pt-4">
+                        <h5 style="font-weight:800;font-size:17px;">Rate Your Consultation</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                      </div>
+                      <div class="modal-body px-4 pb-4">
+                        <form action="/patient/feedback/submit" method="POST">
+                          <input type="hidden" name="appointment" value="<%= appt._id %>">
+
+                          <div class="text-center mb-4">
+                            <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">How was your experience
+                              with Dr. <%= appt.doctor.name %>?</p>
+                            <div class="d-flex justify-content-center gap-2">
+                              <% for(let i=1;i<=5;i++) { %>
+                                <i class="bi bi-star-fill" id="fstar-<%= appt._id %>-<%= i %>"
+                                  style="font-size:30px;color:#d1d5db;cursor:pointer;transition:color 0.15s;"
+                                  onclick="setFeedbackRating('<%= appt._id %>', <%= i %>)"></i>
+                                <% } %>
+                            </div>
+                            <input type="hidden" name="rating" id="ratingVal-<%= appt._id %>" value="5">
+                          </div>
+
+                          <div class="mb-3">
+                            <label class="form-label">Comments (optional)</label>
+                            <textarea name="comments" class="form-control" rows="3"
+                              placeholder="Share your experience — wait time, doctor's behaviour, overall clinic visit..."></textarea>
+                          </div>
+
+                          <button type="submit" class="btn-success-cc w-100"
+                            style="justify-content:center;padding:12px;">
+                            <i class="bi bi-send-fill"></i> Submit Review
+                          </button>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <% } %>
+
+                  <% }) %>
+          </div>
+          <% } %>
+    </section>
+
+
+    <!-- PANEL: CHAT WITH DOCTOR -->
+    <section class="page-panel" id="panel-chat">
+      <div class="section-header mb-4">
+        <div class="section-title">
+          <i class="bi bi-chat-dots-fill"></i> Chat with Doctor
+        </div>
+      </div>
+
+      <% const chatableAppts=appointments.filter(a=> a.status === 'confirmed' || a.status === 'completed'); %>
+
+        <% if (chatableAppts.length===0) { %>
+          <div class="cc-card">
+            <div class="empty-state">
+              <i class="bi bi-chat-square-dots"></i>
+              <p>You can chat with your doctor once your appointment is confirmed or completed.</p>
+              <button class="btn-primary-cc" onclick="showPanel('book')">
+                <i class="bi bi-calendar-plus"></i> Book Appointment
+              </button>
+            </div>
+          </div>
+          <% } else { %>
+            <div class="cc-card" style="overflow:hidden;">
+              <div style="padding:16px 20px;border-bottom:1px solid var(--border);">
+                <p style="font-size:13px;color:var(--muted);margin:0;">
+                  Click on a confirmed or completed appointment below to open the live chat room with your doctor.
+                </p>
+              </div>
+              <% chatableAppts.forEach(appt=> { %>
+                <a href="/patient/live-chat/<%= appt._id %>" class="chat-list-item">
+                  <div style="position:relative;">
+                    <img
+                      src="<%= appt.doctor.profilePicture || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(appt.doctor.name || 'Dr') + '&background=4f46e5&color=fff&size=80' %>"
+                      alt="Doctor">
+                    <div class="online-dot"></div>
+                  </div>
+                  <div style="flex:1;min-width:0;">
+                    <div class="chat-doc-name">Dr. <%= appt.doctor.name %>
+                    </div>
+                    <div class="chat-appt-info">
+                      <%= appt.doctor.specialization %> •
+                        <%= new Date(appt.appointmentDate).toLocaleDateString('en-IN', { day: 'numeric' , month: 'short'
+                          }) %>
+                          at <%= appt.appointmentTimeSlot %>
+                    </div>
+                  </div>
+                  <div class="text-end" style="flex-shrink:0;">
+                    <span class="status-pill status-<%= appt.status %>" style="font-size:10px;">
+                      <%= appt.status %>
+                    </span>
+                    <div style="margin-top:6px;color:var(--primary);font-size:18px;">
+                      <i class="bi bi-arrow-right-circle-fill"></i>
+                    </div>
+                  </div>
+                </a>
+                <% }) %>
+            </div>
+            <% } %>
+    </section>
+
+  </div><!-- /main-wrap -->
+
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    const allClinics = <%- JSON.stringify(clinics || []) %>;
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      const searchInput = document.getElementById('clinicSearch');
+      const resultsDiv = document.getElementById('clinicResults');
+      const hiddenInput = document.getElementById('clinicSelect');
+      
+      if (searchInput) {
+        // Show all clinics on focus
+        searchInput.addEventListener('focus', function() {
+          renderClinics(allClinics);
+        });
+
+        searchInput.addEventListener('input', function(e) {
+          const q = e.target.value.toLowerCase().trim();
+          hiddenInput.value = ''; // reset selection
+          
+          if (!q) {
+            renderClinics(allClinics);
+            return;
+          }
+          
+          const filtered = allClinics.filter(c => 
+            (c.clinicName && c.clinicName.toLowerCase().includes(q)) || 
+            (c.address && c.address.toLowerCase().includes(q))
+          );
+          
+          renderClinics(filtered);
+        });
+
+        function renderClinics(clinicsList) {
+          resultsDiv.innerHTML = '';
+          resultsDiv.style.display = 'block';
+          
+          if (clinicsList.length === 0) {
+            resultsDiv.innerHTML = '<div class="list-group-item text-muted" style="font-size:13px;">No clinics found</div>';
+            return;
+          }
+          
+          clinicsList.forEach(c => {
+            const item = document.createElement('a');
+            item.href = 'javascript:void(0)';
+            item.className = 'list-group-item list-group-item-action p-2';
+            item.style.fontSize = '13px';
+            item.style.borderBottom = '1px solid #eee';
+            item.innerHTML = `<div style="font-weight:600">${c.clinicName}</div><div style="font-size:11px" class="text-muted">${c.address || ''}</div>`;
+            item.onclick = function(e) {
+              e.preventDefault();
+              searchInput.value = c.clinicName;
+              hiddenInput.value = c._id;
+              resultsDiv.style.display = 'none';
+              loadDepartments(); // fetch departments for this clinic
+            };
+            resultsDiv.appendChild(item);
+          });
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+          if (!searchInput.contains(e.target) && !resultsDiv.contains(e.target)) {
+            resultsDiv.style.display = 'none';
+          }
+        });
+      }
+    });
+
+    const panelMap = {
+      overview: { panel: 'panel-overview', label: 'Overview' },
+      book: { panel: 'panel-book', label: 'Book Appointment' },
+      appointments: { panel: 'panel-appointments', label: 'My Appointments' },
+      chat: { panel: 'panel-chat', label: 'Chat with Doctor' },
+    };
+
+    function showPanel(key) {
+      Object.keys(panelMap).forEach(k => {
+        document.getElementById('panel-' + k)?.classList.remove('active');
+        document.getElementById('nav-' + k)?.classList.remove('active');
+      });
+      document.getElementById(panelMap[key].panel)?.classList.add('active');
+      document.getElementById('nav-' + key)?.classList.add('active');
+      document.getElementById('topbarTitle').textContent = panelMap[key].label;
+      closeSidebar();
+    }
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
+      document.getElementById('sidebarOverlay').classList.toggle('show');
+    }
+
+    function closeSidebar() {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sidebarOverlay').classList.remove('show');
+    }
+
+    function filterAppts(status, btn) {
+      document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('#apptList .appt-card').forEach(card => {
+        card.parentElement.style.display =
+          (status === 'all' || card.dataset.cardStatus === status) ? '' : 'none';
+      });
+    }
+
+    let currentStep = 1;
+
+    function updateStepper(step) {
+      for (let i = 1; i <= 3; i++) {
+        const dot = document.getElementById('s' + i);
+        dot.classList.remove('active', 'done');
+        if (i < step) dot.classList.add('done'), dot.innerHTML = '<i class="bi bi-check-lg"></i>';
+        else if (i === step) dot.classList.add('active'), dot.innerHTML = i;
+        else dot.innerHTML = i;
+      }
+      for (let i = 1; i <= 2; i++) {
+        document.getElementById('line' + i).classList.toggle('done', i < step);
+      }
+      document.querySelectorAll('.step-pane').forEach((p, idx) => {
+        p.classList.toggle('active', idx + 1 === step);
+      });
+      currentStep = step;
+    }
+
+    function goStep(step) {
+      // Validate current step before moving forward
+      if (step > currentStep) {
+        if (currentStep === 1) {
+          if (!document.getElementById('clinicSelect').value) { toast('Please choose a clinic.', 'error'); return; }
+          if (!document.getElementById('deptSelect').value) { toast('Please choose a department.', 'error'); return; }
+        }
+        if (currentStep === 2) {
+          if (!document.getElementById('doctorSelect').value) { toast('Please select a doctor.', 'error'); return; }
+          if (!document.getElementById('apptDate').value) { toast('Please pick a date.', 'error'); return; }
+          if (!document.getElementById('slotSelect').value) { toast('Please select a time slot.', 'error'); return; }
+        }
+      }
+      if (step === 3) buildSummary();
+      updateStepper(step);
+    }
+
+    function buildSummary() {
+      const clinicSearch = document.getElementById('clinicSearch');
+      const dept = document.getElementById('deptSelect');
+      const doctor = document.getElementById('doctorSelect');
+      const date = document.getElementById('apptDate').value;
+      const slot = document.getElementById('slotSelect').value;
+      const summary = document.getElementById('bookingSummary');
+
+      summary.innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div><span style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;">Clinic</span>
+          <p style="margin:2px 0 0;font-weight:600;font-size:13px;color:var(--text);">${clinicSearch ? clinicSearch.value : ''}</p></div>
+        <div><span style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;">Department</span>
+          <p style="margin:2px 0 0;font-weight:600;font-size:13px;color:var(--text);">${dept.value}</p></div>
+        <div><span style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;">Doctor</span>
+          <p style="margin:2px 0 0;font-weight:600;font-size:13px;color:var(--text);">${doctor.options[doctor.selectedIndex].text}</p></div>
+        <div><span style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;">Date & Time</span>
+          <p style="margin:2px 0 0;font-weight:600;font-size:13px;color:var(--text);">${new Date(date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} · ${slot}</p></div>
+      </div>
+    `;
+    }
+
+    /* === AJAX: Load Departments === */
+    async function loadDepartments() {
+      const clinicId = document.getElementById('clinicSelect').value;
+      const deptSel = document.getElementById('deptSelect');
+      const docSel = document.getElementById('doctorSelect');
+      const spinner = document.getElementById('deptSpinner');
+
+      deptSel.innerHTML = '<option value="" disabled selected>Loading...</option>';
+      deptSel.disabled = true;
+      docSel.innerHTML = '<option value="" disabled selected>— Choose Department First —</option>';
+      docSel.disabled = true;
+      spinner.classList.remove('d-none');
+
+      try {
+        const res = await fetch(`/api/departments/${clinicId}`);
+        const data = await res.json();
+        deptSel.innerHTML = '<option value="" disabled selected>— Choose Department —</option>';
+        if (data.success && data.data.length) {
+          data.data.forEach(d => {
+            const o = document.createElement('option');
+            o.value = d; o.textContent = d;
+            deptSel.appendChild(o);
+          });
+          deptSel.disabled = false;
+        } else {
+          deptSel.innerHTML = '<option disabled selected>No departments found</option>';
+        }
+      } catch { toast('Could not load departments.', 'error'); }
+      finally { spinner.classList.add('d-none'); }
+    }
+
+    /* === AJAX: Load Doctors === */
+    async function loadDoctors() {
+      const clinicId = document.getElementById('clinicSelect').value;
+      const dept = document.getElementById('deptSelect').value;
+      const docSel = document.getElementById('doctorSelect');
+      const spinner = document.getElementById('docSpinner');
+
+      docSel.innerHTML = '<option value="" disabled selected>Loading...</option>';
+      docSel.disabled = true;
+      spinner.classList.remove('d-none');
+
+      try {
+        const res = await fetch(`/api/doctors/${clinicId}/${encodeURIComponent(dept)}`);
+        const data = await res.json();
+        docSel.innerHTML = '<option value="" disabled selected>— Choose Doctor —</option>';
+        if (data.success && data.data.length) {
+          data.data.forEach(d => {
+            const o = document.createElement('option');
+            o.value = d._id;
+            o.textContent = `Dr. ${d.name} (${d.specialization})`;
+            docSel.appendChild(o);
+          });
+          docSel.disabled = false;
+        } else {
+          docSel.innerHTML = '<option disabled selected>No doctors available</option>';
+        }
+      } catch { toast('Could not load doctors.', 'error'); }
+      finally { spinner.classList.add('d-none'); }
+    }
+
+    async function checkSlots() {
+      const doctorId = document.getElementById('doctorSelect').value;
+      const date = document.getElementById('apptDate').value;
+      const slotSel = document.getElementById('slotSelect');
+      const spinner = document.getElementById('slotSpinner');
+
+      if (!doctorId || !date) return;
+
+      slotSel.innerHTML = '<option value="" disabled selected>Loading slots...</option>';
+      slotSel.disabled = true;
+      spinner.classList.remove('d-none');
+
+      try {
+        const res = await fetch(`/api/slots/${doctorId}?date=${date}`);
+        const data = await res.json();
+        slotSel.innerHTML = '<option value="" disabled selected>— Choose Time Slot —</option>';
+        if (data.success && data.availableSlots.length) {
+          data.availableSlots.forEach(s => {
+            const o = document.createElement('option');
+            o.value = s; o.textContent = s;
+            slotSel.appendChild(o);
+          });
+          slotSel.disabled = false;
+        } else {
+          slotSel.innerHTML = '<option disabled selected>No slots available on this date</option>';
+        }
+      } catch { toast('Could not fetch slots.', 'error'); }
+      finally { spinner.classList.add('d-none'); }
+    }
+
+    // Also trigger slot check when doctor is selected if date already picked
+    document.getElementById('doctorSelect').addEventListener('change', checkSlots);
+
+    // Form submit spinner and payment logic
+    document.getElementById('bookingForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const confirmBtn = document.getElementById('confirmBtn');
+      const confirmSpinner = document.getElementById('confirmSpinner');
+
+      try {
+        confirmBtn.disabled = true;
+        confirmSpinner.classList.remove('d-none');
+
+        // Get form data
+        const formData = {
+          doctor: document.getElementById('doctorSelect').value,
+          clinic: document.getElementById('clinicSelect').value,
+          department: document.getElementById('deptSelect').value,
+          appointmentDate: document.getElementById('apptDate').value,
+          appointmentTimeSlot: document.getElementById('slotSelect').value,
+          symptoms: document.getElementById('symptoms').value,
+        };
+
+        // Check if patient needs to pay
+        const freeCheckRes = await fetch('/api/appointments/check-free');
+        const freeCheckData = await freeCheckRes.json();
+
+        if (!freeCheckData.success) {
+          toast('Failed to check payment status', 'error');
+          confirmBtn.disabled = false;
+          confirmSpinner.classList.add('d-none');
+          return;
+        }
+
+        const requiresPayment = freeCheckData.requiresPayment;
+
+        if (requiresPayment) {
+          // Get doctor info for payment page
+          const doctorId = formData.doctor;
+          const doctorOpt = document.getElementById('doctorSelect');
+          const doctorName = doctorOpt.options[doctorOpt.selectedIndex].text;
+
+          const clinicSearch = document.getElementById('clinicSearch');
+          const clinicName = clinicSearch ? clinicSearch.value : '';
+
+          const consultationFee = 500; // Default fee
+
+          // Redirect to payment page
+          const paymentPageUrl = new URL('/patient/payment', window.location.origin);
+          paymentPageUrl.searchParams.append('doctorId', doctorId);
+          paymentPageUrl.searchParams.append('doctorName', doctorName);
+          paymentPageUrl.searchParams.append('clinicId', formData.clinic);
+          paymentPageUrl.searchParams.append('clinicName', clinicName);
+          paymentPageUrl.searchParams.append('appointmentDate', formData.appointmentDate);
+          paymentPageUrl.searchParams.append('appointmentTimeSlot', formData.appointmentTimeSlot);
+          paymentPageUrl.searchParams.append('department', formData.department);
+          paymentPageUrl.searchParams.append('symptoms', formData.symptoms);
+          paymentPageUrl.searchParams.append('consultationFee', consultationFee);
+
+          window.location.href = paymentPageUrl.toString();
+        } else {
+          // Free appointment - book directly
+          const bookRes = await fetch('/api/appointments', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
+          });
+
+          const bookData = await bookRes.json();
+
+          if (bookData.success) {
+            toast('Free appointment booked successfully!', 'success');
+            setTimeout(() => {
+              showPanel('appointments');
+              document.getElementById('bookingForm').reset();
+              updateStepper(1);
+            }, 1500);
+          } else {
+            toast(bookData.message || 'Booking failed', 'error');
+          }
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        toast('An error occurred. Please try again.', 'error');
+      } finally {
+        confirmBtn.disabled = false;
+        confirmSpinner.classList.add('d-none');
+      }
+    });
+
+    //feedback rating
+    function setFeedbackRating(apptId, val) {
+      document.getElementById('ratingVal-' + apptId).value = val;
+      for (let i = 1; i <= 5; i++) {
+        const star = document.getElementById('fstar-' + apptId + '-' + i);
+        star.style.color = i <= val ? '#f59e0b' : '#d1d5db';
+      }
+    }
+
+    /* =================== SOCKET NOTIFICATIONS =================== */
+    const socket = io();
+    socket.emit('join', '<%= patient._id %>');
+
+    let notifCount = 0;
+
+    socket.on('notification', pushNotif);
+    socket.on('clinic-update', pushNotif);
+    socket.on('doctor-availability', pushNotif);
+
+    function pushNotif(data) {
+      const list = document.getElementById('notifList');
+      const noMsg = document.getElementById('noNotifMsg');
+      const badge = document.getElementById('notifBadge');
+
+      if (noMsg) noMsg.style.display = 'none';
+      notifCount++;
+      badge.textContent = notifCount;
+      badge.style.display = 'flex';
+
+      const el = document.createElement('div');
+      el.className = 'notif-entry';
+      el.innerHTML = `
+      <div style="font-weight:700;font-size:13px;margin-bottom:3px;">
+        <i class="bi bi-info-circle-fill" style="color:var(--primary);margin-right:6px;"></i>${data.title}
+      </div>
+      <p style="margin:0;font-size:12px;color:var(--muted);">${data.message}</p>
+    `;
+      list.prepend(el);
+      toast(data.title, 'info');
+    }
+
+    document.getElementById('notifBtn').addEventListener('click', () => {
+      notifCount = 0;
+      document.getElementById('notifBadge').style.display = 'none';
+    });
+
+    /* =================== TOAST =================== */
+    function toast(msg, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const el = document.createElement('div');
+      el.className = `toast-msg ${type}`;
+      const icons = { success: 'bi-check-circle-fill', error: 'bi-x-circle-fill', info: 'bi-info-circle-fill' };
+      el.innerHTML = `<i class="bi ${icons[type] || icons.info}"></i> ${msg}`;
+      container.appendChild(el);
+      setTimeout(() => el.remove(), 4000);
+    }
+
+    /* =================== URL HASH NAV =================== */
+    const hash = window.location.hash?.replace('#', '');
+    if (panelMap[hash]) showPanel(hash);
+  </script>
+
+</body>
+
+</html>

@@ -1,0 +1,46 @@
+{
+  "name": "clinic_appointment_management_system",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon app.js",
+    "start": "nodemon app.js"
+  },
+  "keywords": [
+    "test"
+  ],
+  "author": "Abhirup Ghosh",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "bcryptjs": "^3.0.3",
+    "bootstrap": "^5.3.8",
+    "cloudinary": "^1.41.3",
+    "connect-flash": "^0.1.1",
+    "connect-mongo": "^6.0.0",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^17.4.2",
+    "ejs": "^5.0.2",
+    "express": "^5.2.1",
+    "express-mongo-sanitize": "^2.2.0",
+    "express-rate-limit": "^8.5.2",
+    "express-session": "^1.19.0",
+    "express-validator": "^7.3.2",
+    "helmet": "^8.1.0",
+    "ioredis": "^5.11.0",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.6.2",
+    "morgan": "^1.10.1",
+    "multer": "^2.1.1",
+    "multer-storage-cloudinary": "^4.0.0",
+    "nodemailer": "^8.0.7",
+    "nodemon": "^3.1.14",
+    "pdfkit": "^0.18.0",
+    "razorpay": "^2.9.6",
+    "socket.io": "^4.8.3",
+    "tailwind": "^4.0.0"
+  }
+}

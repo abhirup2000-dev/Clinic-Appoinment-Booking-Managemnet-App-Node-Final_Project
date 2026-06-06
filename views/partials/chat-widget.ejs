@@ -1,0 +1,174 @@
+<!-- CareConnect Chat Support Widget -->
+<button class="cc-chat-fab" id="chatFab" onclick="toggleChatPanel()" aria-label="Open Chat Support">
+  <i class="bi bi-chat-dots-fill" id="chatFabIcon"></i>
+</button>
+
+<div class="cc-chat-panel" id="chatPanel">
+  <div class="cc-chat-header">
+    <div class="cc-chat-header-avatar">
+      <i class="bi bi-robot"></i>
+    </div>
+    <div class="cc-chat-header-info">
+      <h6>CareConnect Support</h6>
+      <small><i class="bi bi-circle-fill text-success me-1" style="font-size:7px;"></i> Online now</small>
+    </div>
+    <button class="cc-chat-close" onclick="toggleChatPanel()" aria-label="Close chat">
+      <i class="bi bi-x-lg"></i>
+    </button>
+  </div>
+
+  <div class="cc-chat-messages" id="chatMessages">
+    <div class="cc-chat-bubble bot">
+      <div class="markdown-body">👋 Hello! I'm CareConnect's AI virtual assistant. How can I help you today?</div>
+    </div>
+  </div>
+
+  <div class="cc-chat-quick-replies" id="chatQuickReplies">
+    <button class="cc-chat-quick-btn" onclick="sendQuickReply('How do I book an appointment?')">📅 Book Appointment</button>
+    <button class="cc-chat-quick-btn" onclick="sendQuickReply('What services do you offer?')">🏥 Services</button>
+    <button class="cc-chat-quick-btn" onclick="sendQuickReply('How do I find a doctor?')">👨‍⚕️ Find Doctor</button>
+    <button class="cc-chat-quick-btn" onclick="sendQuickReply('I need help with my account')">🔑 Account Help</button>
+  </div>
+
+  <div class="cc-chat-input">
+    <input type="text" id="chatInput" placeholder="Type your message..." autocomplete="off"
+      onkeypress="if(event.key==='Enter')sendChatMessage()">
+    <button onclick="sendChatMessage()" aria-label="Send message">
+      <i class="bi bi-send-fill"></i>
+    </button>
+  </div>
+</div>
+
+<!-- Add marked.js for Markdown parsing -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+<script>
+  let chatSessionId = null;
+
+  // Chat panel toggle
+  function toggleChatPanel() {
+    const panel = document.getElementById('chatPanel');
+    const icon = document.getElementById('chatFabIcon');
+    panel.classList.toggle('open');
+    if (panel.classList.contains('open')) {
+      icon.className = 'bi bi-x-lg';
+      document.getElementById('chatInput').focus();
+    } else {
+      icon.className = 'bi bi-chat-dots-fill';
+    }
+  }
+
+  // Send a quick reply button
+  function sendQuickReply(text) {
+    document.getElementById('chatQuickReplies').style.display = 'none';
+    appendMessage(text, 'user');
+    showTypingThenReply(text);
+  }
+
+  // Send message from input
+  function sendChatMessage() {
+    const input = document.getElementById('chatInput');
+    const text = input.value.trim();
+    if (!text) return;
+    input.value = '';
+    document.getElementById('chatQuickReplies').style.display = 'none';
+    appendMessage(text, 'user');
+    showTypingThenReply(text);
+  }
+
+  // Append a message bubble
+  function appendMessage(text, sender) {
+    const container = document.getElementById('chatMessages');
+    const div = document.createElement('div');
+    div.className = 'cc-chat-bubble ' + sender;
+    
+    // Create a container for markdown rendering
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'markdown-body';
+    
+    if (sender === 'bot') {
+      contentDiv.innerHTML = marked.parse(text);
+    } else {
+      contentDiv.textContent = text;
+    }
+    
+    div.appendChild(contentDiv);
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+  }
+
+  // Show typing indicator then respond
+  function showTypingThenReply(userText) {
+    const container = document.getElementById('chatMessages');
+    const typing = document.createElement('div');
+    typing.className = 'cc-chat-typing';
+    typing.id = 'typingIndicator';
+    typing.innerHTML = '<span></span><span></span><span></span>';
+    container.appendChild(typing);
+    container.scrollTop = container.scrollHeight;
+
+    // Try the AI endpoint first, fallback to local responses
+    fetchAIResponse(userText).then(reply => {
+      const t = document.getElementById('typingIndicator');
+      if (t) t.remove();
+      appendMessage(reply, 'bot');
+    });
+  }
+
+  // AI response (tries /api/ai/chat, falls back to local)
+  async function fetchAIResponse(userText) {
+    try {
+      const payload = { message: userText };
+      if (chatSessionId) {
+        payload.sessionId = chatSessionId;
+      }
+
+      const res = await fetch('/api/ai/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.sessionId) chatSessionId = data.sessionId;
+        if (data.reply) return data.reply;
+      }
+    } catch (e) {
+      console.error("AI chat error:", e);
+    }
+    return getLocalResponse(userText);
+  }
+
+  // Local fallback chatbot responses
+  function getLocalResponse(msg) {
+    const lower = msg.toLowerCase();
+    if (lower.includes('book') || lower.includes('appointment')) {
+      return '📅 To book an appointment:\n1. Click "Book Appointment" in the navigation\n2. Register or log in as a patient\n3. Select your clinic, department, and doctor\n4. Choose your preferred date and time slot\n5. Confirm your booking!\n\nNeed more help? Feel free to ask!';
+    }
+    if (lower.includes('service') || lower.includes('department')) {
+      return '🏥 We offer comprehensive services including:\n• Cardiology — Heart health & diagnostics\n• Pediatrics — Child healthcare\n• Dental Care — Oral health\n• Neurology — Brain & nerve care\n• General Medicine — Primary care\n• Orthopedics — Bone & joint care\n\nVisit our Services page for more details!';
+    }
+    if (lower.includes('doctor') || lower.includes('specialist')) {
+      return '👨‍⚕️ All our doctors are verified, board-certified specialists. You can:\n• Browse the Doctors page to see all available specialists\n• Filter by specialization or clinic\n• View their qualifications and experience\n• Book directly from their profile\n\nVisit /doctors to explore!';
+    }
+    if (lower.includes('account') || lower.includes('login') || lower.includes('register') || lower.includes('password')) {
+      return '🔑 For account-related queries:\n• Register: Visit /patient/register-view\n• Login: Visit /patient/login-view\n• Forgot Password: Use the "Forgot Password" link on the login page\n\nIf you are facing issues, please contact support@careconnect.com';
+    }
+    if (lower.includes('clinic') || lower.includes('location') || lower.includes('address')) {
+      return '📍 We have multiple partner clinics across the city. Visit our Clinics page at /clinics to see all locations, their departments, ratings, and available doctors.';
+    }
+    if (lower.includes('cancel') || lower.includes('reschedule')) {
+      return '🔄 To cancel or reschedule:\n1. Log into your patient dashboard\n2. Go to "My Appointments"\n3. Select the appointment you want to modify\n4. Use the Cancel or Reschedule option\n\nPlease note: cancellations should be made at least 24 hours in advance.';
+    }
+    if (lower.includes('emergency') || lower.includes('urgent')) {
+      return '🚨 For medical emergencies, please call 112 (India Emergency) or visit your nearest hospital immediately.\n\nOur support line: +91 (033) 2468 1357\nEmail: support@careconnect.com';
+    }
+    if (lower.includes('thank') || lower.includes('thanks')) {
+      return '😊 You\'re welcome! Is there anything else I can help you with?';
+    }
+    if (lower.includes('hello') || lower.includes('hi') || lower.includes('hey')) {
+      return '👋 Hello there! Welcome to CareConnect. How can I assist you today? You can ask about appointments, doctors, services, or anything else!';
+    }
+    return '🤖 Thank you for your message! I can help with:\n• Booking appointments\n• Finding doctors & clinics\n• Understanding our services\n• Account help\n\nCould you please rephrase or choose one of these topics? For complex queries, email us at support@careconnect.com.';
+  }
+</script>

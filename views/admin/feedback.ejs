@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Patient Feedback — CareConnect Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <style>
+    :root { --sidebar-w: 270px; --topbar-h: 70px; }
+    body { background: #0f1117; font-family: 'Inter', sans-serif; color: #e2e8f0; min-height: 100vh; }
+
+    .cc-sidebar { width: var(--sidebar-w); position: fixed; top: 0; left: 0; height: 100vh; background: linear-gradient(180deg, #13151f 0%, #0d0f18 100%); border-right: 1px solid rgba(255,255,255,.06); display: flex; flex-direction: column; z-index: 1000; overflow-y: auto; }
+    .sidebar-brand { padding: 24px 22px 18px; border-bottom: 1px solid rgba(255,255,255,.06); display: flex; align-items: center; gap: 12px; }
+    .brand-icon { width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #10b981, #6366f1); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+    .brand-name { font-size: 17px; font-weight: 800; color: #fff; letter-spacing: -.3px; }
+    .brand-sub  { font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; }
+    .sidebar-nav { padding: 18px 14px; flex: 1; }
+    .nav-section-label { font-size: 9.5px; font-weight: 700; letter-spacing: 1.5px; color: #475569; text-transform: uppercase; padding: 0 8px; margin: 18px 0 8px; }
+    .nav-item { display: flex; align-items: center; gap: 11px; padding: 10px 14px; border-radius: 10px; color: #94a3b8; text-decoration: none; font-size: 14px; font-weight: 500; transition: all .2s; margin-bottom: 2px; }
+    .nav-item:hover { background: rgba(255,255,255,.06); color: #e2e8f0; }
+    .nav-item.active { background: rgba(16,185,129,.12); color: #10b981; }
+    .nav-item i { font-size: 17px; width: 20px; text-align: center; }
+    .sidebar-footer { padding: 16px 14px; border-top: 1px solid rgba(255,255,255,.06); }
+    .logout-btn { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 10px; color: #f87171; text-decoration: none; font-size: 14px; font-weight: 500; transition: background .2s; }
+    .logout-btn:hover { background: rgba(248,113,113,.1); color: #f87171; }
+
+    .cc-main { margin-left: var(--sidebar-w); min-height: 100vh; }
+    .cc-topbar { height: var(--topbar-h); background: rgba(15,17,23,.95); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,.06); display: flex; align-items: center; justify-content: space-between; padding: 0 28px; position: sticky; top: 0; z-index: 100; }
+    .topbar-title { font-size: 19px; font-weight: 700; color: #f1f5f9; }
+    .topbar-sub   { font-size: 12px; color: #64748b; margin-top: 1px; }
+    .notif-btn { width: 40px; height: 40px; border-radius: 10px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08); color: #94a3b8; display: flex; align-items: center; justify-content: center; font-size: 17px; cursor: pointer; transition: all .2s; position: relative; }
+    .notif-btn:hover { background: rgba(255,255,255,.1); color: #e2e8f0; }
+    .notif-dot { position: absolute; top: 7px; right: 7px; width: 8px; height: 8px; border-radius: 50%; background: #10b981; border: 2px solid #0f1117; display: none; }
+
+    .cc-content { padding: 28px; }
+
+    /* Rating summary banner */
+    .rating-banner {
+      background: linear-gradient(135deg, rgba(16,185,129,.12), rgba(99,102,241,.1));
+      border: 1px solid rgba(16,185,129,.2); border-radius: 16px;
+      padding: 24px 28px; margin-bottom: 24px;
+      display: flex; align-items: center; gap: 32px; flex-wrap: wrap;
+    }
+    .avg-score { font-size: 56px; font-weight: 900; color: #f59e0b; line-height: 1; }
+    .avg-label { font-size: 13px; color: #64748b; margin-top: 4px; }
+    .star-big { color: #f59e0b; font-size: 22px; }
+    .rating-bars { flex: 1; min-width: 200px; }
+    .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+    .bar-label { font-size: 12px; color: #94a3b8; width: 30px; text-align: right; }
+    .bar-track { flex: 1; height: 6px; background: rgba(255,255,255,.08); border-radius: 3px; overflow: hidden; }
+    .bar-fill  { height: 100%; background: linear-gradient(90deg, #f59e0b, #fbbf24); border-radius: 3px; transition: width .6s ease; }
+
+    .stats-strip { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.07); border-radius: 14px; padding: 18px 20px; display: flex; align-items: center; gap: 14px; }
+    .stat-icon { width: 46px; height: 46px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+    .stat-icon.amber   { background: rgba(245,158,11,.15);  color: #f59e0b; }
+    .stat-icon.emerald { background: rgba(16,185,129,.15);  color: #10b981; }
+    .stat-icon.rose    { background: rgba(244,63,94,.15);   color: #f43f5e; }
+    .stat-icon.indigo  { background: rgba(99,102,241,.15);  color: #6366f1; }
+    .stat-val  { font-size: 24px; font-weight: 800; color: #f1f5f9; line-height: 1; }
+    .stat-label{ font-size: 12px; color: #64748b; margin-top: 3px; }
+
+    /* Table */
+    .table-card { background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.07); border-radius: 16px; overflow: hidden; }
+    .table-card-header { padding: 18px 22px; border-bottom: 1px solid rgba(255,255,255,.06); display: flex; align-items: center; justify-content: space-between; }
+    .cc-table { width: 100%; border-collapse: collapse; }
+    .cc-table thead tr { background: rgba(255,255,255,.03); border-bottom: 1px solid rgba(255,255,255,.06); }
+    .cc-table th { padding: 13px 18px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: #64748b; }
+    .cc-table tbody tr { border-bottom: 1px solid rgba(255,255,255,.04); transition: background .15s; }
+    .cc-table tbody tr:hover { background: rgba(255,255,255,.025); }
+    .cc-table tbody tr:last-child { border-bottom: none; }
+    .cc-table td { padding: 16px 18px; vertical-align: middle; }
+    .person-name { font-size: 14px; font-weight: 600; color: #f1f5f9; }
+    .person-sub  { font-size: 12px; color: #64748b; margin-top: 2px; }
+    .star-row { display: flex; gap: 2px; }
+    .star-row i { font-size: 15px; }
+    .star-filled { color: #f59e0b; }
+    .star-empty  { color: #334155; }
+    .comment-text { font-size: 13px; color: #94a3b8; font-style: italic; max-width: 220px; }
+    .rating-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+    .rating-5 { background: rgba(16,185,129,.15);  color: #10b981; }
+    .rating-4 { background: rgba(245,158,11,.15);  color: #f59e0b; }
+    .rating-3 { background: rgba(99,102,241,.12);  color: #818cf8; }
+    .rating-2 { background: rgba(244,63,94,.1);    color: #f43f5e; }
+    .rating-1 { background: rgba(244,63,94,.1);    color: #f43f5e; }
+    .empty-state { padding: 60px; text-align: center; color: #475569; }
+    .empty-state i { font-size: 48px; margin-bottom: 14px; display: block; color: #334155; }
+
+    #notifToast { position: fixed; top: 80px; right: 24px; z-index: 9999; background: #171a25; border: 1px solid rgba(16,185,129,.3); border-radius: 14px; padding: 14px 18px; max-width: 320px; display: flex; align-items: flex-start; gap: 12px; box-shadow: 0 8px 32px rgba(0,0,0,.5); transform: translateX(120%); transition: transform .4s cubic-bezier(.34,1.56,.64,1); }
+    #notifToast.show { transform: translateX(0); }
+    .toast-icon { font-size: 22px; color: #f59e0b; flex-shrink: 0; margin-top: 2px; }
+    .toast-title { font-size: 13px; font-weight: 700; color: #f1f5f9; }
+    .toast-msg   { font-size: 12px; color: #94a3b8; margin-top: 2px; }
+
+    @media (max-width: 991px) {
+      .cc-sidebar { transform: translateX(-100%); }
+      .cc-main { margin-left: 0; }
+      .stats-strip { grid-template-columns: repeat(2,1fr); }
+      .rating-banner { flex-direction: column; gap: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <%- include('../partials/flash') %>
+
+  <aside class="cc-sidebar">
+      <div class="brand-icon">🏥</div>
+      <div>
+        <div class="brand-name">CareConnect</div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+      <a href="/admin/dashboard" class="nav-item"><i class="bi bi-speedometer2"></i> Overview</a>
+      <a href="/admin/profile"   class="nav-item"><i class="bi bi-person-circle"></i> My Profile</a>
+      <div class="nav-section-label">Management</div>
+      <a href="/admin/appointments" class="nav-item"><i class="bi bi-calendar-check"></i> Appointments</a>
+      <a href="/admin/doctors"      class="nav-item"><i class="bi bi-person-badge"></i> Doctors</a>
+      <a href="/admin/patients"     class="nav-item"><i class="bi bi-people"></i> Patients</a>
+      <a href="/admin/clinics"      class="nav-item"><i class="bi bi-hospital"></i> Clinics</a>
+      <div class="nav-section-label">Reports</div>
+      <a href="/admin/feedback" class="nav-item active"><i class="bi bi-star-half"></i> Feedback</a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="/admin/logout" class="logout-btn"><i class="bi bi-box-arrow-right"></i> Sign Out</a>
+    </div>
+  </aside>
+
+  <div class="cc-main">
+    <div class="cc-topbar">
+      <div>
+        <div class="topbar-title">Patient Feedback</div>
+        <div class="topbar-sub">Review clinic ratings, comments & service quality</div>
+      </div>
+      <div class="notif-btn" id="notifBell">
+        <i class="bi bi-bell"></i>
+        <span class="notif-dot" id="notifDot"></span>
+      </div>
+    </div>
+
+    <div class="cc-content">
+
+      <!-- Rating banner -->
+      <%
+        const totalFb = feedbacks.length;
+        const avgRating = totalFb > 0 ? (feedbacks.reduce((s,f) => s + (f.rating||0), 0) / totalFb).toFixed(1) : '0.0';
+        const ratingCounts = [0,0,0,0,0];
+        feedbacks.forEach(f => { if(f.rating>=1&&f.rating<=5) ratingCounts[f.rating-1]++; });
+      %>
+      <div class="rating-banner">
+        <div style="text-align:center;">
+          <div class="avg-score"><%= avgRating %></div>
+          <div class="star-row" style="justify-content:center;margin:6px 0;">
+            <% for(let i=1;i<=5;i++) { %>
+              <i class="bi bi-star<%= i <= Math.round(parseFloat(avgRating)) ? '-fill' : '' %> star-big"></i>
+            <% } %>
+          </div>
+          <div class="avg-label"><%= totalFb %> reviews</div>
+        </div>
+        <div class="rating-bars">
+          <% for(let r=5;r>=1;r--) { %>
+            <div class="bar-row">
+              <div class="bar-label"><%= r %>★</div>
+              <div class="bar-track">
+                <div class="bar-fill" style="width:<%= totalFb > 0 ? Math.round(ratingCounts[r-1]/totalFb*100) : 0 %>%;"></div>
+              </div>
+              <div style="font-size:12px;color:#64748b;width:24px;"><%= ratingCounts[r-1] %></div>
+            </div>
+          <% } %>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="font-size:13px;color:#94a3b8;"><i class="bi bi-graph-up me-2" style="color:#10b981;"></i><%= feedbacks.filter(f=>f.rating>=4).length %> positive reviews</div>
+          <div style="font-size:13px;color:#94a3b8;"><i class="bi bi-graph-down me-2" style="color:#f43f5e;"></i><%= feedbacks.filter(f=>f.rating<=2).length %> critical reviews</div>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-strip">
+        <div class="stat-card">
+          <div class="stat-icon amber"><i class="bi bi-star-fill"></i></div>
+          <div><div class="stat-val"><%= avgRating %></div><div class="stat-label">Avg Rating</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon emerald"><i class="bi bi-chat-heart"></i></div>
+          <div><div class="stat-val"><%= feedbacks.filter(f=>f.rating>=4).length %></div><div class="stat-label">Positive</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon rose"><i class="bi bi-emoji-frown"></i></div>
+          <div><div class="stat-val"><%= feedbacks.filter(f=>f.rating<=2).length %></div><div class="stat-label">Critical</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon indigo"><i class="bi bi-collection"></i></div>
+          <div><div class="stat-val"><%= totalFb %></div><div class="stat-label">Total Reviews</div></div>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="table-card">
+        <div class="table-card-header">
+          <div style="font-size:15px;font-weight:700;color:#f1f5f9;">All Feedback Records</div>
+        </div>
+        <div class="table-responsive">
+          <table class="cc-table">
+            <thead>
+              <tr>
+                <th>Patient</th>
+                <th>Doctor Reviewed</th>
+                <th>Clinic</th>
+                <th>Rating</th>
+                <th>Comments</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (feedbacks.length === 0) { %>
+                <tr>
+                  <td colspan="6">
+                    <div class="empty-state">
+                      <i class="bi bi-star"></i>
+                      <p>No patient feedback received yet.</p>
+                    </div>
+                  </td>
+                </tr>
+              <% } else { %>
+                <% feedbacks.forEach(fb => { %>
+                  <tr>
+                    <td>
+                      <div class="person-name"><%= fb.patient ? fb.patient.name : 'Anonymous' %></div>
+                      <div class="person-sub"><%= fb.patient ? fb.patient.email : 'N/A' %></div>
+                    </td>
+                    <td>
+                      <div class="person-name"><%= fb.doctor ? fb.doctor.name : '—' %></div>
+                      <div class="person-sub"><%= fb.doctor ? fb.doctor.specialization || '—' : '—' %></div>
+                    </td>
+                    <td><span style="font-size:13px;font-weight:500;color:#e2e8f0;"><%= fb.clinic ? fb.clinic.clinicName : '—' %></span></td>
+                    <td>
+                      <div class="star-row" style="margin-bottom:4px;">
+                        <% for(let i=1;i<=5;i++) { %>
+                          <i class="bi bi-star<%= i <= fb.rating ? '-fill star-filled' : ' star-empty' %>"></i>
+                        <% } %>
+                      </div>
+                      <span class="rating-badge rating-<%= fb.rating %>"><%= fb.rating %>/5</span>
+                    </td>
+                    <td><p class="comment-text">"<%= fb.comments %>"</p></td>
+                    <td><span style="font-size:12px;color:#64748b;"><%= new Date(fb.createdAt).toLocaleDateString("en-IN", { day: 'numeric', month: 'short', year: 'numeric' }) %></span></td>
+                  </tr>
+                <% }) %>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="notifToast">
+    <div class="toast-icon"><i class="bi bi-star-fill"></i></div>
+    <div>
+      <div class="toast-title" id="toastTitle">Notification</div>
+      <div class="toast-msg"  id="toastMsg"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    <% if (typeof admin !== 'undefined' && admin) { %>
+      socket.emit('join', 'user_<%= admin._id %>');
+    <% } %>
+    function showToast(title, msg) {
+      document.getElementById('toastTitle').textContent = title;
+      document.getElementById('toastMsg').textContent   = msg;
+      document.getElementById('notifDot').style.display = 'block';
+      const t = document.getElementById('notifToast');
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 5000);
+    }
+    socket.on('notification', data => showToast(data.title || 'Notification', data.message || ''));
+  </script>
+</body>
+</html>
