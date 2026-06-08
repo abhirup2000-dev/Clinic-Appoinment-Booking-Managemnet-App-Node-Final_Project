@@ -11,6 +11,19 @@ const storage = new CloudinaryStorage({
   },
 });
 
+const reportStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: "MedicalReports",
+    // Use raw to keep files exactly as uploaded (preserving PDFs, etc.)
+    resource_type: "raw",
+  },
+});
+
 const upload = multer({ storage: storage });
+const reportUpload = multer({ storage: reportStorage });
+
+// Attach reportUpload to the main upload middleware object for backwards compatibility
+upload.reportUpload = reportUpload;
 
 module.exports = upload;

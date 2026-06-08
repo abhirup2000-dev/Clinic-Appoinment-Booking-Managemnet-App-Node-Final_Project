@@ -1,0 +1,1149 @@
+{
+	"info": {
+		"_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+		"name": "Clinic Appointment Booking API",
+		"description": "Complete API collection for the Clinic Appointment Booking & Management App.\n\nSetup:\n1. Set the `baseUrl` variable to your server (default: http://localhost:3000)\n2. Register/Login to get a JWT token\n3. The login request auto-saves the token to the `token` collection variable\n\nRoles: super_admin, clinic_admin, patient, doctor",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "clinicId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "doctorId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "appointmentId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "feedbackId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "paymentId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "notificationId",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"item": [
+		{
+			"name": "🔐 Authentication",
+			"description": "User registration, login, OTP verification, password reset, and profile management.",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{ "key": "name", "value": "John Doe", "type": "text" },
+								{ "key": "email", "value": "john@example.com", "type": "text" },
+								{ "key": "password", "value": "Password@123", "type": "text" },
+								{ "key": "phone", "value": "9876543210", "type": "text" },
+								{ "key": "role", "value": "patient", "type": "text", "description": "patient | clinic_admin | super_admin" },
+								{ "key": "profilePicture", "type": "file", "src": "", "description": "Optional profile image" }
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "register"]
+						},
+						"description": "Register a new user. Sends OTP to the provided email for verification."
+					}
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const res = pm.response.json();",
+									"if (res.token) {",
+									"    pm.collectionVariables.set('token', res.token);",
+									"    console.log('✅ Token saved to collection variable');",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"john@example.com\",\n    \"password\": \"Password@123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "login"]
+						},
+						"description": "Login with email and password. The JWT token is auto-saved to the `token` collection variable."
+					}
+				},
+				{
+					"name": "Verify OTP",
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"john@example.com\",\n    \"otp\": \"123456\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/verify-otp",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "verify-otp"]
+						},
+						"description": "Verify the OTP sent to the user's email after registration."
+					}
+				},
+				{
+					"name": "Resend OTP",
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"john@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/resend-otp",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "resend-otp"]
+						},
+						"description": "Resend the OTP to the user's email."
+					}
+				},
+				{
+					"name": "Forgot Password",
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"john@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/forgot-password",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "forgot-password"]
+						},
+						"description": "Request a password reset link. Sends a reset token to the user's email."
+					}
+				},
+				{
+					"name": "Reset Password",
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"token\": \"<reset-token-from-email>\",\n    \"newPassword\": \"NewPassword@123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/reset-password",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "reset-password"]
+						},
+						"description": "Reset password using the token received via email."
+					}
+				},
+				{
+					"name": "Get Profile",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/profile",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "profile"]
+						},
+						"description": "Get the authenticated user's profile. Requires JWT token."
+					}
+				},
+				{
+					"name": "Update Profile",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{ "key": "name", "value": "John Doe Updated", "type": "text" },
+								{ "key": "phone", "value": "9876543211", "type": "text" },
+								{ "key": "profilePicture", "type": "file", "src": "", "description": "Optional new profile image" }
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/update-profile",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "update-profile"]
+						},
+						"description": "Update the authenticated user's profile. Requires JWT token."
+					}
+				}
+			]
+		},
+		{
+			"name": "🏥 Clinics",
+			"description": "CRUD operations for clinics. Creating/deleting requires super_admin role.",
+			"item": [
+				{
+					"name": "Create Clinic",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const res = pm.response.json();",
+									"if (res.clinic && res.clinic._id) {",
+									"    pm.collectionVariables.set('clinicId', res.clinic._id);",
+									"    console.log('✅ clinicId saved');",
+									"} else if (res.data && res.data._id) {",
+									"    pm.collectionVariables.set('clinicId', res.data._id);",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{ "key": "name", "value": "City Health Clinic", "type": "text" },
+								{ "key": "address", "value": "123 Main Street, New York, NY", "type": "text" },
+								{ "key": "phone", "value": "1234567890", "type": "text" },
+								{ "key": "email", "value": "clinic@example.com", "type": "text" },
+								{ "key": "logo", "type": "file", "src": "", "description": "Optional clinic logo" }
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/clinics",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "clinics"]
+						},
+						"description": "Create a new clinic. Requires super_admin role."
+					}
+				},
+				{
+					"name": "Sync Geocodes",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/clinics/sync-geocodes",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "clinics", "sync-geocodes"]
+						},
+						"description": "Sync geocode data for all clinics. Requires super_admin role."
+					}
+				},
+				{
+					"name": "Get All Clinics",
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/clinics",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "clinics"]
+						},
+						"description": "Get a list of all clinics. Public endpoint."
+					}
+				},
+				{
+					"name": "Get Nearby Clinics",
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/clinics/nearby?lat=40.7128&lng=-74.0060&maxDistance=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "clinics", "nearby"],
+							"query": [
+								{ "key": "lat", "value": "40.7128", "description": "Latitude" },
+								{ "key": "lng", "value": "-74.0060", "description": "Longitude" },
+								{ "key": "maxDistance", "value": "10", "description": "Max distance in km" }
+							]
+						},
+						"description": "Find clinics near a given location. Public endpoint."
+					}
+				},
+				{
+					"name": "Get Clinic by ID",
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/clinics/{{clinicId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "clinics", "{{clinicId}}"]
+						},
+						"description": "Get a specific clinic by its ID. Public endpoint."
+					}
+				},
+				{
+					"name": "Update Clinic",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{ "key": "name", "value": "Updated Clinic Name", "type": "text" },
+								{ "key": "address", "value": "456 Updated Ave", "type": "text" },
+								{ "key": "logo", "type": "file", "src": "", "description": "Optional updated logo" }
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/clinics/{{clinicId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "clinics", "{{clinicId}}"]
+						},
+						"description": "Update a clinic. Requires authentication."
+					}
+				},
+				{
+					"name": "Delete Clinic",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/clinics/{{clinicId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "clinics", "{{clinicId}}"]
+						},
+						"description": "Delete a clinic. Requires super_admin role."
+					}
+				}
+			]
+		},
+		{
+			"name": "👨‍⚕️ Doctors",
+			"description": "CRUD operations for doctors. Creating/deleting requires super_admin or clinic_admin role.",
+			"item": [
+				{
+					"name": "Create Doctor",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const res = pm.response.json();",
+									"if (res.doctor && res.doctor._id) {",
+									"    pm.collectionVariables.set('doctorId', res.doctor._id);",
+									"    console.log('✅ doctorId saved');",
+									"} else if (res.data && res.data._id) {",
+									"    pm.collectionVariables.set('doctorId', res.data._id);",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{ "key": "name", "value": "Dr. Jane Smith", "type": "text" },
+								{ "key": "email", "value": "drjane@example.com", "type": "text" },
+								{ "key": "phone", "value": "9876543210", "type": "text" },
+								{ "key": "specialization", "value": "Cardiology", "type": "text" },
+								{ "key": "department", "value": "Cardiology", "type": "text" },
+								{ "key": "clinicId", "value": "{{clinicId}}", "type": "text" },
+								{ "key": "profilePicture", "type": "file", "src": "", "description": "Optional doctor photo" }
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/doctors",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "doctors"]
+						},
+						"description": "Create a new doctor. Requires super_admin or clinic_admin role."
+					}
+				},
+				{
+					"name": "Get All Doctors",
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/doctors",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "doctors"]
+						},
+						"description": "Get a list of all doctors. Public endpoint."
+					}
+				},
+				{
+					"name": "Get Doctor by ID",
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/doctors/{{doctorId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "doctors", "{{doctorId}}"]
+						},
+						"description": "Get a specific doctor by their ID. Public endpoint."
+					}
+				},
+				{
+					"name": "Update Doctor",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{ "key": "name", "value": "Dr. Jane Smith Updated", "type": "text" },
+								{ "key": "specialization", "value": "Neurology", "type": "text" },
+								{ "key": "profilePicture", "type": "file", "src": "", "description": "Optional updated photo" }
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/doctors/{{doctorId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "doctors", "{{doctorId}}"]
+						},
+						"description": "Update a doctor's information. Requires authentication."
+					}
+				},
+				{
+					"name": "Delete Doctor",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/doctors/{{doctorId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "doctors", "{{doctorId}}"]
+						},
+						"description": "Delete a doctor. Requires super_admin or clinic_admin role."
+					}
+				}
+			]
+		},
+		{
+			"name": "🧑‍🤒 Patients",
+			"description": "Patient profile and report management. Requires patient role.",
+			"item": [
+				{
+					"name": "Get Patient Profile",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/patients/profile",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "patients", "profile"]
+						},
+						"description": "Get the logged-in patient's profile. Requires patient role."
+					}
+				},
+				{
+					"name": "Update Patient Profile",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{ "key": "name", "value": "Updated Patient Name", "type": "text" },
+								{ "key": "phone", "value": "9876543222", "type": "text" },
+								{ "key": "profilePicture", "type": "file", "src": "", "description": "Optional profile image" }
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/patients/profile",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "patients", "profile"]
+						},
+						"description": "Update the logged-in patient's profile. Requires patient role."
+					}
+				},
+				{
+					"name": "Upload Medical Report",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{ "key": "report", "type": "file", "src": "", "description": "Medical report file (PDF, image, etc.)" }
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/patients/reports/upload",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "patients", "reports", "upload"]
+						},
+						"description": "Upload a medical report. Requires patient role."
+					}
+				},
+				{
+					"name": "Get Patient Appointments",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/patients/appointments",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "patients", "appointments"]
+						},
+						"description": "Get all appointments for the logged-in patient. Requires patient role."
+					}
+				}
+			]
+		},
+		{
+			"name": "📅 Appointments",
+			"description": "Appointment booking and management.",
+			"item": [
+				{
+					"name": "Book Appointment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const res = pm.response.json();",
+									"if (res.appointment && res.appointment._id) {",
+									"    pm.collectionVariables.set('appointmentId', res.appointment._id);",
+									"    console.log('✅ appointmentId saved');",
+									"} else if (res.data && res.data._id) {",
+									"    pm.collectionVariables.set('appointmentId', res.data._id);",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"doctorId\": \"{{doctorId}}\",\n    \"clinicId\": \"{{clinicId}}\",\n    \"date\": \"2026-06-15\",\n    \"time\": \"10:00\",\n    \"reason\": \"General checkup\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/appointments",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "appointments"]
+						},
+						"description": "Book a new appointment. Requires patient role."
+					}
+				},
+				{
+					"name": "Check Free Appointment",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/appointments/check-free?doctorId={{doctorId}}&date=2026-06-15",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "appointments", "check-free"],
+							"query": [
+								{ "key": "doctorId", "value": "{{doctorId}}" },
+								{ "key": "date", "value": "2026-06-15" }
+							]
+						},
+						"description": "Check if a free appointment is available for a given doctor and date. Requires patient role."
+					}
+				},
+				{
+					"name": "Get All Appointments",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/appointments",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "appointments"]
+						},
+						"description": "Get all appointments. Requires authentication."
+					}
+				},
+				{
+					"name": "Get Appointment by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/appointments/{{appointmentId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "appointments", "{{appointmentId}}"]
+						},
+						"description": "Get a specific appointment by ID. Requires authentication."
+					}
+				},
+				{
+					"name": "Update Appointment",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"date\": \"2026-06-16\",\n    \"time\": \"14:00\",\n    \"reason\": \"Updated reason\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/appointments/{{appointmentId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "appointments", "{{appointmentId}}"]
+						},
+						"description": "Update an appointment. Requires authentication."
+					}
+				},
+				{
+					"name": "Delete Appointment",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/appointments/{{appointmentId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "appointments", "{{appointmentId}}"]
+						},
+						"description": "Delete an appointment. Requires authentication."
+					}
+				},
+				{
+					"name": "Update Appointment Status",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"confirmed\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/appointments/{{appointmentId}}/status",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "appointments", "{{appointmentId}}", "status"]
+						},
+						"description": "Update the status of an appointment (e.g., confirmed, completed, cancelled)."
+					}
+				},
+				{
+					"name": "Cancel Appointment",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/appointments/{{appointmentId}}/cancel",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "appointments", "{{appointmentId}}", "cancel"]
+						},
+						"description": "Cancel an appointment. Requires authentication."
+					}
+				}
+			]
+		},
+		{
+			"name": "📋 Smart Form Slots",
+			"description": "Endpoints for the smart booking form — fetching departments, doctors by department, and available time slots.",
+			"item": [
+				{
+					"name": "Get Departments by Clinic",
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/departments/{{clinicId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "departments", "{{clinicId}}"]
+						},
+						"description": "Get all departments for a specific clinic."
+					}
+				},
+				{
+					"name": "Get Doctors by Department",
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/doctors/{{clinicId}}/Cardiology",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "doctors", "{{clinicId}}", "Cardiology"]
+						},
+						"description": "Get all doctors in a specific department at a given clinic. Replace 'Cardiology' with the actual department name."
+					}
+				},
+				{
+					"name": "Get Available Slots",
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/slots/{{doctorId}}?date=2026-06-15",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "slots", "{{doctorId}}"],
+							"query": [
+								{ "key": "date", "value": "2026-06-15", "description": "Date to check slots for (YYYY-MM-DD)" }
+							]
+						},
+						"description": "Get available appointment slots for a specific doctor on a given date."
+					}
+				}
+			]
+		},
+		{
+			"name": "⭐ Feedbacks",
+			"description": "Patient feedback submission and management.",
+			"item": [
+				{
+					"name": "Submit Feedback",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const res = pm.response.json();",
+									"if (res.feedback && res.feedback._id) {",
+									"    pm.collectionVariables.set('feedbackId', res.feedback._id);",
+									"} else if (res.data && res.data._id) {",
+									"    pm.collectionVariables.set('feedbackId', res.data._id);",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"doctorId\": \"{{doctorId}}\",\n    \"clinicId\": \"{{clinicId}}\",\n    \"appointmentId\": \"{{appointmentId}}\",\n    \"rating\": 5,\n    \"comment\": \"Excellent service! Very professional.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/feedbacks",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "feedbacks"]
+						},
+						"description": "Submit feedback for an appointment. Requires patient role."
+					}
+				},
+				{
+					"name": "Get All Feedbacks",
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/feedbacks",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "feedbacks"]
+						},
+						"description": "Get all feedbacks. Public endpoint."
+					}
+				},
+				{
+					"name": "Get Feedback by ID",
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/feedbacks/{{feedbackId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "feedbacks", "{{feedbackId}}"]
+						},
+						"description": "Get a specific feedback by its ID. Public endpoint."
+					}
+				},
+				{
+					"name": "Delete Feedback",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/feedbacks/{{feedbackId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "feedbacks", "{{feedbackId}}"]
+						},
+						"description": "Delete a feedback. Requires super_admin or clinic_admin role."
+					}
+				}
+			]
+		},
+		{
+			"name": "💳 Payments",
+			"description": "Payment order creation, verification, listing, and refunds.",
+			"item": [
+				{
+					"name": "Create Payment Order",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"appointmentId\": \"{{appointmentId}}\",\n    \"amount\": 500\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/payments/create-order",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "payments", "create-order"]
+						},
+						"description": "Create a payment order for an appointment. Requires patient role."
+					}
+				},
+				{
+					"name": "Verify Payment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"razorpay_order_id\": \"order_xxxxx\",\n    \"razorpay_payment_id\": \"pay_xxxxx\",\n    \"razorpay_signature\": \"signature_xxxxx\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/payments/verify",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "payments", "verify"]
+						},
+						"description": "Verify a Razorpay payment after completion."
+					}
+				},
+				{
+					"name": "Get All Payments",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "payments"]
+						},
+						"description": "Get all payment records. Requires authentication."
+					}
+				},
+				{
+					"name": "Refund Payment",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/payments/refund/{{paymentId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "payments", "refund", "{{paymentId}}"]
+						},
+						"description": "Initiate a refund for a payment. Requires authentication."
+					}
+				}
+			]
+		},
+		{
+			"name": "🔔 Notifications",
+			"description": "Notification management — read, mark as read, send, and get unread count.",
+			"item": [
+				{
+					"name": "Get Unread Count",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/notifications/unread-count",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "notifications", "unread-count"]
+						},
+						"description": "Get the count of unread notifications for the authenticated user."
+					}
+				},
+				{
+					"name": "Get My Notifications",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/notifications",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "notifications"]
+						},
+						"description": "Get all notifications for the authenticated user."
+					}
+				},
+				{
+					"name": "Mark All as Read",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/notifications/read-all",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "notifications", "read-all"]
+						},
+						"description": "Mark all notifications as read for the authenticated user."
+					}
+				},
+				{
+					"name": "Mark One as Read",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/notifications/{{notificationId}}/read",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "notifications", "{{notificationId}}", "read"]
+						},
+						"description": "Mark a specific notification as read."
+					}
+				},
+				{
+					"name": "Send Notification",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"recipientId\": \"<user-id>\",\n    \"title\": \"Appointment Reminder\",\n    \"message\": \"Your appointment is tomorrow at 10:00 AM\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/notifications/send",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "notifications", "send"]
+						},
+						"description": "Send a notification to a user. Requires authentication."
+					}
+				}
+			]
+		},
+		{
+			"name": "🤖 AI",
+			"description": "AI-powered features — doctor recommendations, wait time predictions, slot suggestions, and chatbot.",
+			"item": [
+				{
+					"name": "Recommend Doctor",
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"symptoms\": \"chest pain, shortness of breath\",\n    \"clinicId\": \"{{clinicId}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/ai/recommend-doctor",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "ai", "recommend-doctor"]
+						},
+						"description": "Get AI-powered doctor recommendations based on symptoms."
+					}
+				},
+				{
+					"name": "Predict Waiting Time",
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"doctorId\": \"{{doctorId}}\",\n    \"date\": \"2026-06-15\",\n    \"time\": \"10:00\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/ai/predict-waiting-time",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "ai", "predict-waiting-time"]
+						},
+						"description": "Get AI-predicted waiting time for a doctor appointment."
+					}
+				},
+				{
+					"name": "Recommend Slot",
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"doctorId\": \"{{doctorId}}\",\n    \"preferredDate\": \"2026-06-15\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/ai/recommend-slot",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "ai", "recommend-slot"]
+						},
+						"description": "Get AI-recommended best time slots for an appointment."
+					}
+				},
+				{
+					"name": "Chat with Bot",
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"message\": \"What specialties do you have?\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/ai/chat",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "ai", "chat"]
+						},
+						"description": "Chat with the AI health assistant bot."
+					}
+				},
+				{
+					"name": "Get Chat History",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/ai/chat-history",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "ai", "chat-history"]
+						},
+						"description": "Get AI chat history for the authenticated user."
+					}
+				}
+			]
+		},
+		{
+			"name": "💬 Live Chat",
+			"description": "Real-time chat between doctors and patients for a specific appointment.",
+			"item": [
+				{
+					"name": "Get Chat Messages",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/live-chat/{{appointmentId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "live-chat", "{{appointmentId}}"]
+						},
+						"description": "Get all chat messages for a specific appointment. Requires authentication."
+					}
+				},
+				{
+					"name": "Send Chat Message",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"message\": \"Hello Doctor, I have a question about my prescription.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/live-chat/{{appointmentId}}/send",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "live-chat", "{{appointmentId}}", "send"]
+						},
+						"description": "Send a chat message in an appointment's live chat. Requires doctor auth."
+					}
+				},
+				{
+					"name": "Upload Chat File",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{ "key": "file", "type": "file", "src": "", "description": "File to share in the chat (image, PDF, etc.)" }
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/live-chat/{{appointmentId}}/upload",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "live-chat", "{{appointmentId}}", "upload"]
+						},
+						"description": "Upload a file attachment in the live chat. Requires doctor auth."
+					}
+				}
+			]
+		}
+	]
+}

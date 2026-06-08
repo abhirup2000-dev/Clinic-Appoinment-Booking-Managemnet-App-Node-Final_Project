@@ -118,7 +118,7 @@ router.post(
   "/patients/reports/upload",
   apiAuthCheck,
   restrictTo("patient"),
-  upload.single("report"),
+  upload.reportUpload.single("report"),
   apiPatientController.uploadReport,
 );
 router.get(

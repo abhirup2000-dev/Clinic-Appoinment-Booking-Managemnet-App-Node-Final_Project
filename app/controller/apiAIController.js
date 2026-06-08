@@ -209,7 +209,7 @@ class apiAIController {
       // Fetch existing history for this session
       let chatHistory = await ChatHistoryModel.findOne({ sessionId: activeSessionId });
       let historyArray = [];
-      
+
       if (chatHistory) {
         historyArray = chatHistory.messages.map(m => ({
           role: m.role,
@@ -238,8 +238,8 @@ class apiAIController {
         });
       }
 
-      return res.status(200).json({ 
-        success: true, 
+      return res.status(200).json({
+        success: true,
         reply,
         sessionId: activeSessionId
       });
@@ -252,7 +252,7 @@ class apiAIController {
   async getChatHistory(req, res) {
     try {
       const userId = req.user.userId;
-      
+
       // Get the most recent active session for this user
       const chatHistory = await ChatHistoryModel.findOne({ userId })
         .sort({ lastActivityAt: -1 })

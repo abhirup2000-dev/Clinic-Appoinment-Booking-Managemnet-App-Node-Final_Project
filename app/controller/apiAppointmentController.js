@@ -385,7 +385,7 @@ class apiAppointmentController {
         // =========================
         // NOTIFICATIONS
         // =========================
-        const notificationMessage = isFreeTier 
+        const notificationMessage = isFreeTier
           ? `Your free appointment at ${item.c.clinicName} with ${item.d.name} has been booked successfully.`
           : `Your paid appointment at ${item.c.clinicName} with ${item.d.name} has been booked successfully. Amount: INR ${consultationFee.toFixed(2)}.`;
 
@@ -408,10 +408,10 @@ class apiAppointmentController {
         ]);
 
         // =========================
-        const emailSubject = isFreeTier 
+        const emailSubject = isFreeTier
           ? "Free Appointment Confirmed! - CareConnect"
           : "Paid Appointment Confirmed! - CareConnect";
-        
+
         const emailHtml = isFreeTier
           ? `<div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
               <h3 style="color: #10b981;">Appointment Booked Successfully!</h3>
@@ -459,8 +459,8 @@ class apiAppointmentController {
 
       return res.status(201).json({
         success: true,
-        message: isFreeTier 
-          ? "Appointment successfully booked (Free Tier)" 
+        message: isFreeTier
+          ? "Appointment successfully booked (Free Tier)"
           : "Appointment successfully booked (Paid)",
         data: appointment,
         isFreeTier: isFreeTier,

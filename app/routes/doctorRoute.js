@@ -21,7 +21,7 @@ const upload = require("../utils/CloudinaryStorage");
 router.get("/dashboard", doctorAuthCheck, doctorController.viewDashboard);
 router.post("/appointments/update/:id", doctorAuthCheck, doctorController.updateAppointmentStatus);
 router.post("/appointments/complete/:id", doctorAuthCheck, doctorController.completeAppointment);
-router.post("/appointments/upload-report/:id", doctorAuthCheck, upload.single("report"), doctorController.uploadMedicalReport);
+router.post("/appointments/upload-report/:id", doctorAuthCheck, upload.reportUpload.single("report"), doctorController.uploadMedicalReport);
 router.get("/live-chat/:appointmentId", doctorAuthCheck, doctorController.viewLiveChat);
 
 module.exports = router;

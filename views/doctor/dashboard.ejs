@@ -13,207 +13,9 @@
   <link rel="stylesheet" href="/css/main.css">
   
   <style>
-    /* Doctor Dashboard Specific Styles */
     body {
       background: var(--cc-slate-50);
     }
-
-    .cc-dashboard-nav {
-      background: var(--cc-white);
-      border-bottom: 1px solid var(--cc-slate-200);
-    }
-
-    .cc-dashboard-header {
-      background: linear-gradient(135deg, var(--cc-indigo) 0%, var(--cc-indigo-hover) 100%);
-      color: var(--cc-white);
-      border-radius: var(--radius-xl);
-      padding: 40px;
-      position: relative;
-      overflow: hidden;
-      box-shadow: var(--shadow-indigo);
-    }
-
-    .cc-dashboard-header::before {
-      content: '';
-      position: absolute;
-      top: -30%; right: -10%;
-      width: 300px; height: 300px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
-      pointer-events: none;
-    }
-
-    .cc-avatar-lg {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 4px solid rgba(255, 255, 255, 0.3);
-      box-shadow: var(--shadow-sm);
-    }
-
-    .cc-avatar-md {
-      width: 45px;
-      height: 45px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid var(--cc-slate-200);
-    }
-
-    /* Tabs */
-    .cc-nav-tabs {
-      border-bottom: 2px solid var(--cc-slate-200);
-      margin-bottom: 30px;
-    }
-
-    .cc-nav-tabs .nav-link {
-      font-weight: 700;
-      color: var(--cc-slate-500);
-      border: none !important;
-      padding: 14px 24px;
-      transition: all 0.25s;
-      position: relative;
-    }
-
-    .cc-nav-tabs .nav-link::after {
-      content: '';
-      position: absolute;
-      bottom: 0; left: 50%;
-      width: 0; height: 3px;
-      background: var(--cc-indigo);
-      transition: all 0.25s var(--ease-smooth);
-      transform: translateX(-50%);
-    }
-
-    .cc-nav-tabs .nav-link.active {
-      color: var(--cc-indigo) !important;
-      background: none !important;
-    }
-
-    .cc-nav-tabs .nav-link.active::after {
-      width: 80%;
-    }
-
-    /* Ledger Table */
-    .cc-table {
-      margin-bottom: 0;
-    }
-
-    .cc-table th {
-      font-weight: 700;
-      text-transform: uppercase;
-      font-size: 11px;
-      letter-spacing: 0.8px;
-      color: var(--cc-slate-500);
-      padding: 16px 20px;
-      background: var(--cc-slate-100);
-      border: none;
-    }
-
-    .cc-table td {
-      padding: 18px 20px;
-      border-bottom: 1px solid var(--cc-slate-100);
-    }
-
-    /* Statuses */
-    .cc-status-badge {
-      font-size: 11px;
-      font-weight: 700;
-      padding: 6px 12px;
-      border-radius: var(--radius-full);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .cc-status-pending { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
-    .cc-status-confirmed { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
-    .cc-status-completed { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
-    .cc-status-cancelled { background: #fdf2f2; color: #dc2626; border: 1px solid #fecdcd; }
-
-    /* Dropdowns */
-    .notif-bell-wrapper {
-      position: relative;
-      cursor: pointer;
-    }
-    
-    .notif-bell-wrapper .badge {
-      position: absolute;
-      top: -5px; right: -8px;
-      font-size: 9px;
-      min-width: 18px;
-      height: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      animation: bellPulse 2s infinite;
-    }
-
-    @keyframes bellPulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.15); }
-    }
-
-    .notif-dropdown {
-      position: absolute;
-      top: 50px; right: 0;
-      width: 370px;
-      max-height: 440px;
-      background: var(--cc-white);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-xl);
-      z-index: 3000;
-      display: none;
-      overflow: hidden;
-      border: 1px solid var(--cc-slate-200);
-    }
-
-    .notif-dropdown.show { display: block; }
-    
-    .notif-dropdown-header {
-      padding: 16px 20px;
-      background: linear-gradient(135deg, var(--cc-indigo) 0%, var(--cc-indigo-hover) 100%);
-      color: white;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .notif-dropdown-body {
-      max-height: 340px;
-      overflow-y: auto;
-      padding: 8px 0;
-    }
-
-    .notif-dropdown-body::-webkit-scrollbar { width: 4px; }
-    .notif-dropdown-body::-webkit-scrollbar-thumb { background: var(--cc-slate-400); border-radius: 4px; }
-
-    .notif-item {
-      padding: 14px 20px;
-      border-bottom: 1px solid var(--cc-slate-100);
-      display: flex;
-      gap: 12px;
-      align-items: flex-start;
-      transition: background-color 0.2s;
-      cursor: pointer;
-    }
-
-    .notif-item:hover { background: #eef2ff; }
-    .notif-item.unread { background: #eef2ff; border-left: 3px solid var(--cc-indigo); }
-    
-    .notif-item .notif-icon {
-      width: 36px; height: 36px; border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0; font-size: 16px;
-    }
-
-    .notif-icon.appointment { background: #dbeafe; color: #2563eb; }
-    .notif-icon.system { background: #f3e8ff; color: #7c3aed; }
-    .notif-icon.doctor { background: #d1fae5; color: #059669; }
-    .notif-icon.clinic { background: #fef3c7; color: #d97706; }
-    .notif-icon.payment { background: #fce7f3; color: #db2777; }
-    .notif-icon.feedback { background: #fff7ed; color: #ea580c; }
-    .notif-empty { text-align: center; padding: 40px 20px; color: var(--cc-slate-400); }
 
     /* Live Toasts */
     .live-toast-container {
@@ -289,7 +91,7 @@
             <img src="<%= doctor.profilePicture || 'https://placehold.co/150x150?text=Doctor' %>" alt="avatar" class="cc-avatar-md" style="border-color: var(--cc-indigo);">
           </div>
 
-          <a href="/doctor/logout" class="btn btn-cc-outline py-2 px-3 btn-sm" style="border-color:var(--cc-danger); color:var(--cc-danger)!important;">
+          <a href="/doctor/logout" class="btn btn-cc-danger-outline py-2 px-3 btn-sm">
             <i class="bi bi-box-arrow-right me-1"></i> Logout
           </a>
         </div>
@@ -307,7 +109,7 @@
           <p class="mb-0 text-white opacity-75">Assigned to Clinic: <strong><%= doctor.clinic ? doctor.clinic.clinicName : 'None' %></strong> (Specialization: <%= doctor.specialization %>)</p>
         </div>
       </div>
-      <div class="bg-white bg-opacity-20 px-4 py-3 rounded-4 text-center" style="backdrop-filter:blur(4px);">
+      <div class="bg-transparent bg-opacity-20 px-4 py-3 rounded-4 text-center" style="backdrop-filter:blur(4px);">
         <h3 class="mb-0 fw-extrabold text-white"><%= activeAppointments.length %></h3>
         <small class="text-white opacity-75 text-uppercase fw-bold" style="font-size: 10px; letter-spacing:1px;">Active Slots</small>
       </div>
@@ -323,6 +125,11 @@
       <li class="nav-item" role="presentation">
         <button class="nav-link" id="history-tab" data-bs-toggle="tab" data-bs-target="#historyAppts" type="button" role="tab" aria-selected="false">
           <i class="bi bi-clock-history me-2"></i>Consultation History (<%= finishedAppointments.length %>)
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profileSettings" type="button" role="tab" aria-selected="false">
+          <i class="bi bi-person-circle me-2"></i>Profile Settings
         </button>
       </li>
     </ul>
@@ -393,7 +200,7 @@
                             </form>
                             <form action="/doctor/appointments/update/<%= appt._id %>" method="POST">
                               <input type="hidden" name="status" value="cancelled">
-                              <button type="submit" class="btn btn-sm btn-cc-outline px-3 py-1.5" style="border-color:var(--cc-danger); color:var(--cc-danger)!important; border-radius:8px;">
+                              <button type="submit" class="btn btn-sm btn-cc-danger-outline px-3 py-1.5" style="border-radius:8px;">
                                 <i class="bi bi-x-circle me-1"></i> Reject
                               </button>
                             </form>
@@ -552,6 +359,66 @@
           <% } %>
         </div>
       </div>
+
+      <!-- Profile Settings Tab -->
+      <div class="tab-pane fade" id="profileSettings" role="tabpanel">
+        <div class="profile-card">
+          <h4 class="fw-bold text-dark mb-4"><i class="bi bi-person-circle text-indigo me-2"></i>Profile Settings</h4>
+          
+          <form id="doctorProfileForm" enctype="multipart/form-data">
+            <div class="text-center mb-4">
+              <div class="profile-picture-container">
+                <img src="<%= doctor.profilePicture || 'https://placehold.co/150x150?text=Doctor' %>" 
+                     alt="Doctor Avatar" id="doc-profile-preview-img">
+                <label class="profile-picture-upload-btn" for="doc-profile-picture-input">
+                  <i class="bi bi-camera-fill"></i>
+                  <input type="file" id="doc-profile-picture-input" name="profilePicture" accept="image/*" onchange="previewDocProfilePicture(event)">
+                </label>
+              </div>
+              <div class="small text-muted">Upload a JPG or PNG picture.</div>
+            </div>
+
+            <div class="profile-info-grid">
+              <div class="mb-3">
+                <label class="form-label-premium" for="doc-profile-name">Full Name</label>
+                <input type="text" id="doc-profile-name" name="name" class="form-control-premium w-100" value="<%= doctor.name %>" required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label-premium" for="doc-profile-email">Email Address</label>
+                <input type="email" id="doc-profile-email" name="email" class="form-control-premium w-100" value="<%= doctor.email %>" required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label-premium" for="doc-profile-phone">Phone Number</label>
+                <input type="tel" id="doc-profile-phone" name="phone" class="form-control-premium w-100" value="<%= doctor.phone %>">
+              </div>
+              <div class="mb-3">
+                <label class="form-label-premium" for="doc-profile-age">Age</label>
+                <input type="number" id="doc-profile-age" name="age" class="form-control-premium w-100" value="<%= doctor.age || '' %>" min="0" max="150">
+              </div>
+              <div class="mb-3">
+                <label class="form-label-premium" for="doc-profile-gender">Gender</label>
+                <select id="doc-profile-gender" name="gender" class="form-select-premium w-100">
+                  <option value="" disabled <%= !doctor.gender ? 'selected' : '' %>>Select Gender</option>
+                  <option value="male" <%= doctor.gender === 'male' ? 'selected' : '' %>>Male</option>
+                  <option value="female" <%= doctor.gender === 'female' ? 'selected' : '' %>>Female</option>
+                  <option value="other" <%= doctor.gender === 'other' ? 'selected' : '' %>>Other</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label class="form-label-premium" for="doc-profile-spec">Specialization</label>
+                <input type="text" id="doc-profile-spec" name="specialization" class="form-control-premium w-100" value="<%= doctor.specialization %>" required>
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-end mt-4">
+              <button type="submit" class="btn btn-cc-primary py-2.5 px-4" id="saveDocProfileBtn">
+                <span class="spinner-border spinner-border-sm d-none me-2" id="docProfileSpinner"></span>
+                <i class="bi bi-save-fill me-1"></i> Save Changes
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -696,6 +563,61 @@
 
     // Initial load
     refreshNotifBell();
+
+    /* =================== DOCTOR PROFILE MANAGEMENT =================== */
+    function previewDocProfilePicture(event) {
+      const input = event.target;
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          document.getElementById('doc-profile-preview-img').src = e.target.result;
+        };
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+
+    document.getElementById('doctorProfileForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const form = e.target;
+      const saveBtn = document.getElementById('saveDocProfileBtn');
+      const spinner = document.getElementById('docProfileSpinner');
+      const DOCTOR_ID_STR = "<%= doctor._id %>";
+
+      saveBtn.disabled = true;
+      spinner.classList.remove('d-none');
+
+      try {
+        const formData = new FormData(form);
+
+        const res = await fetch(`/api/doctors/${DOCTOR_ID_STR}`, {
+          method: 'PUT',
+          body: formData
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          showLiveToast('Profile Updated ✓', 'Your profile has been saved successfully.', 'system');
+
+          // Live-update the navbar avatar & name
+          if (data.data && data.data.name) {
+            document.querySelectorAll('.cc-avatar-md, .cc-avatar-lg').forEach(img => {
+              const newPic = form.querySelector('#doc-profile-preview-img')?.src;
+              if (newPic && !newPic.includes('placehold.co')) img.src = newPic;
+            });
+          }
+        } else {
+          showLiveToast('Update Failed', data.message || 'Could not save profile changes.', 'system');
+        }
+      } catch (err) {
+        console.error('Doctor profile update error:', err);
+        showLiveToast('Error', 'A network error occurred. Please try again.', 'system');
+      } finally {
+        saveBtn.disabled = false;
+        spinner.classList.add('d-none');
+      }
+    });
   </script>
 
   <!-- Bootstrap JS -->

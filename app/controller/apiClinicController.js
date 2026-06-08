@@ -32,9 +32,9 @@ class apiClinicController {
         ? Array.isArray(departments)
           ? departments
           : departments
-              .split(",")
-              .map((d) => d.trim())
-              .filter(Boolean)
+            .split(",")
+            .map((d) => d.trim())
+            .filter(Boolean)
         : [];
 
       let finalLat = latitude ? parseFloat(latitude) : 0;
@@ -66,7 +66,7 @@ class apiClinicController {
         logo: req.file
           ? req.file.path
           : "https://placehold.co/150x150?text=" +
-            encodeURIComponent(clinicName),
+          encodeURIComponent(clinicName),
         publicId: req.file ? req.file.filename : "",
       });
 
@@ -271,9 +271,9 @@ class apiClinicController {
         ? Array.isArray(departments)
           ? departments
           : departments
-              .split(",")
-              .map((d) => d.trim())
-              .filter(Boolean)
+            .split(",")
+            .map((d) => d.trim())
+            .filter(Boolean)
         : clinic.departments;
 
       clinic.clinicName = clinicName || clinic.clinicName;
@@ -304,13 +304,13 @@ class apiClinicController {
         }
       } else if (!clinic.location || (clinic.location.coordinates[0] === 0 && clinic.location.coordinates[1] === 0)) {
         // Automatically geocode if no coordinates exist at all
-         const geoResult = await geocodeAddress(clinic.address);
-         if (geoResult) {
-           clinic.location = {
-             type: "Point",
-             coordinates: [geoResult.longitude, geoResult.latitude],
-           };
-         }
+        const geoResult = await geocodeAddress(clinic.address);
+        if (geoResult) {
+          clinic.location = {
+            type: "Point",
+            coordinates: [geoResult.longitude, geoResult.latitude],
+          };
+        }
       }
 
       if (req.file) {
@@ -479,7 +479,7 @@ class apiClinicController {
         } else {
           failedCount++;
         }
-        
+
         // Add a small delay to respect Nominatim rate limits (1 request per second max)
         await new Promise(resolve => setTimeout(resolve, 1500));
       }

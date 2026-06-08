@@ -560,12 +560,15 @@ class patientController {
       const { paymentId } = req.params;
       const patientId = req.patient.userId;
 
-      let query = {};
+      let query = { patient: patientId, status: "paid" };
       if (mongoose.Types.ObjectId.isValid(paymentId)) {
-        query = { _id: paymentId, patient: patientId, status: "paid" };
+        // Find payment by its document ID OR by its linked appointment ID
+        query.$or = [
+          { _id: paymentId },
+          { appointment: paymentId }
+        ];
       } else {
-        // If it's an appointment ID
-        query = { appointment: paymentId, patient: patientId, status: "paid" };
+        query.paymentId = paymentId;
       }
 
       const payment = await PaymentModel.findOne(query);
@@ -621,22 +624,18 @@ class patientController {
 
       const fileUrl = appt.medicalReport;
 
-      // Determine filename from URL
-      const urlParts = fileUrl.split('/');
-      const rawFilename = urlParts[urlParts.length - 1].split('?')[0];
-      const filename = rawFilename || 'medical_report';
-
-      // Determine content type
-      const ext = filename.split('.').pop().toLowerCase();
-      const contentTypeMap = {
-        pdf: 'application/pdf',
-        png: 'image/png',
-        jpg: 'image/jpeg',
-        jpeg: 'image/jpeg',
-        gif: 'image/gif',
-        webp: 'image/webp',
+      // Helper function to resolve extension from content-type header
+      const getExtensionFromContentType = (contentType, defaultExt) => {
+        const mimeToExt = {
+          'application/pdf': 'pdf',
+          'image/png': 'png',
+          'image/jpeg': 'jpg',
+          'image/jpg': 'jpg',
+          'image/gif': 'gif',
+          'image/webp': 'webp',
+        };
+        return mimeToExt[contentType] || defaultExt;
       };
-      const contentType = contentTypeMap[ext] || 'application/octet-stream';
 
       // Stream the file from Cloudinary through our server
       const protocol = fileUrl.startsWith('https') ? https : http;
@@ -646,8 +645,10 @@ class patientController {
           const redirectUrl = remoteRes.headers.location;
           const redirectProtocol = redirectUrl.startsWith('https') ? https : http;
           redirectProtocol.get(redirectUrl, (redirectedRes) => {
+            const contentType = redirectedRes.headers['content-type'] || 'application/pdf';
+            const ext = getExtensionFromContentType(contentType, 'pdf');
             res.setHeader('Content-Type', contentType);
-            res.setHeader('Content-Disposition', `attachment; filename="medical_report_${appointmentId}.${ext || 'pdf'}"`);
+            res.setHeader('Content-Disposition', `attachment; filename="medical_report_${appointmentId}.${ext}"`);
             redirectedRes.pipe(res);
           }).on('error', (err) => {
             console.error('Redirect stream error:', err);
@@ -657,8 +658,10 @@ class patientController {
           return;
         }
 
+        const contentType = remoteRes.headers['content-type'] || 'application/pdf';
+        const ext = getExtensionFromContentType(contentType, 'pdf');
         res.setHeader('Content-Type', contentType);
-        res.setHeader('Content-Disposition', `attachment; filename="medical_report_${appointmentId}.${ext || 'pdf'}"`);
+        res.setHeader('Content-Disposition', `attachment; filename="medical_report_${appointmentId}.${ext}"`);
         remoteRes.pipe(res);
       }).on('error', (err) => {
         console.error('Medical report download error:', err);
