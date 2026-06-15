@@ -13,6 +13,7 @@ const { sendEmail } = require("../config/emailconfig");
 const { welcomeEmailTemplate } = require("../services/emailTemplates");
 const PaymentModel = require("../model/payment.model");
 const { generateInvoicePDF } = require("../utils/pdfGenerator");
+const redis = require("../utils/redis");
 
 class patientController {
   viewLoginPage(req, res) {
@@ -57,12 +58,15 @@ class patientController {
       const plainOtp = await otpService.createAndSaveOtp(newUser._id);
       await otpService.sendOtpEmail(email, name, plainOtp);
 
-      req.flash('success', 'Registration successful. Please verify your email.');
-      req.flash('requiresVerification', email);
+      req.flash(
+        "success",
+        "Registration successful. Please verify your email.",
+      );
+      req.flash("requiresVerification", email);
       res.redirect("/patient/login-view");
     } catch (err) {
       console.error("Patient Register Error:", err);
-      req.flash('error', 'Registration failed. Please try again.');
+      req.flash("error", "Registration failed. Please try again.");
       res.redirect("/patient/register-view");
     }
   }
@@ -77,26 +81,75 @@ class patientController {
 
       const user = await UserModel.findOne({ email });
 
-      if (!user || user.role !== "patient") {
-        req.flash('error', 'Invalid email credentials');
+      //rate limiting using redis--block account temporariliy after 5 failed attempts
+      const attemptsKey = `login_attempts:${email}:${req.ip}`;
+      const lockKey = `account_locked:${email}:${req.ip}`;
+
+      // Check if account is locked
+      const isLocked = await redis.get(lockKey);
+
+      if (isLocked) {
+        req.flash(
+          "error",
+          "Account locked due to multiple failed login attempts. Try again later.",
+        );
         return res.redirect("/patient/login-view");
       }
 
+      //user role check in before login
+      if (!user || user.role !== "patient") {
+        req.flash("error", "Invalid email credentials");
+        return res.redirect("/patient/login-view");
+      }
+
+      //cant login if the account block by admin
       if (user.status === "blocked") {
-        req.flash('error', 'Your account has been blocked by the administrator.');
+        req.flash(
+          "error",
+          "Your account has been blocked by the administrator.",
+        );
         return res.redirect("/patient/login-view");
       }
 
       if (!user.isVerified) {
-        req.flash('error', 'Please verify your email address before logging in.');
-        req.flash('requiresVerification', user.email);
+        req.flash(
+          "error",
+          "Please verify your email address before logging in.",
+        );
+        req.flash("requiresVerification", user.email);
         return res.redirect("/patient/login-view");
       }
 
       const isMatch = await bcrypt.compare(password, user.password);
 
+      // if (!isMatch) {
+      //   req.flash("error", "Invalid password credentials");
+      //   return res.redirect("/patient/login-view");
+      // }
+
       if (!isMatch) {
-        req.flash('error', 'Invalid password credentials');
+        const attempts = await redis.incr(attemptsKey);
+
+        // First failure starts expiry timer
+        if (attempts === 1) {
+          await redis.expire(attemptsKey, 15 * 60);
+        }
+
+        // Lock account after 5 failed attempts
+        if (attempts >= 5) {
+          await redis.set(lockKey, "locked", "EX", 15 * 60);
+
+          req.flash(
+            "error",
+            "Account locked for 15 minutes due to multiple failed login attempts.",
+          );
+          return res.redirect("/patient/login-view");
+        }
+
+        req.flash(
+          "error",
+          `Invalid password. ${5 - attempts} attempts remaining.`,
+        );
         return res.redirect("/patient/login-view");
       }
 
@@ -143,10 +196,15 @@ class patientController {
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
-      res.redirect("/patient/dashboard");
+      //delete value from redis after successfully login
+      await redis.del(attemptsKey);
+      await redis.del(lockKey);
+
+      req.flash("success", "Logged in successfully");
+      return res.redirect("/patient/dashboard");
     } catch (err) {
       console.error("Patient Login Error:", err);
-      req.flash('error', 'Login failed. Please try again.');
+      req.flash("error", "Login failed. Please try again.");
       res.redirect("/patient/login-view");
     }
   }
@@ -155,21 +213,21 @@ class patientController {
     try {
       const { email, otp } = req.body;
       if (!email || !otp) {
-        req.flash('error', 'Email and OTP are required');
-        req.flash('requiresVerification', email || '');
+        req.flash("error", "Email and OTP are required");
+        req.flash("requiresVerification", email || "");
         return res.redirect("/patient/login-view");
       }
 
       const user = await UserModel.findOne({ email });
       if (!user) {
-        req.flash('error', 'User not found');
+        req.flash("error", "User not found");
         return res.redirect("/patient/login-view");
       }
 
       const verificationResult = await otpService.verifyUserOtp(user._id, otp);
       if (!verificationResult.valid) {
-        req.flash('error', verificationResult.reason);
-        req.flash('requiresVerification', email);
+        req.flash("error", verificationResult.reason);
+        req.flash("requiresVerification", email);
         return res.redirect("/patient/login-view");
       }
 
@@ -183,11 +241,11 @@ class patientController {
         html: welcomeEmailTemplate(user.name, user.role),
       });
 
-      req.flash('success', 'Email verified successfully. You can now log in.');
+      req.flash("success", "Email verified successfully. You can now log in.");
       return res.redirect("/patient/login-view");
     } catch (error) {
       console.error("Verify OTP Error:", error);
-      req.flash('error', 'OTP verification failed');
+      req.flash("error", "OTP verification failed");
       return res.redirect("/patient/login-view");
     }
   }
@@ -563,10 +621,7 @@ class patientController {
       let query = { patient: patientId, status: "paid" };
       if (mongoose.Types.ObjectId.isValid(paymentId)) {
         // Find payment by its document ID OR by its linked appointment ID
-        query.$or = [
-          { _id: paymentId },
-          { appointment: paymentId }
-        ];
+        query.$or = [{ _id: paymentId }, { appointment: paymentId }];
       } else {
         query.paymentId = paymentId;
       }
@@ -574,33 +629,57 @@ class patientController {
       const payment = await PaymentModel.findOne(query);
 
       if (!payment) {
-        req.flash('error', 'Invoice not found or payment not completed.');
+        req.flash("error", "Invoice not found or payment not completed.");
         return res.redirect("/patient/dashboard");
       }
 
       const patientInfo = await PaymentModel.aggregate([
         { $match: { _id: payment._id } },
-        { $lookup: { from: "users", localField: "patient", foreignField: "_id", as: "p" } },
+        {
+          $lookup: {
+            from: "users",
+            localField: "patient",
+            foreignField: "_id",
+            as: "p",
+          },
+        },
         { $unwind: "$p" },
-        { $lookup: { from: "appointments", localField: "appointment", foreignField: "_id", as: "a" } },
+        {
+          $lookup: {
+            from: "appointments",
+            localField: "appointment",
+            foreignField: "_id",
+            as: "a",
+          },
+        },
         { $unwind: "$a" },
-        { $lookup: { from: "users", localField: "a.doctor", foreignField: "_id", as: "d" } },
+        {
+          $lookup: {
+            from: "users",
+            localField: "a.doctor",
+            foreignField: "_id",
+            as: "d",
+          },
+        },
         { $unwind: { path: "$d", preserveNullAndEmptyArrays: true } },
       ]);
 
       if (patientInfo.length === 0) {
-        req.flash('error', 'Invoice data is incomplete.');
+        req.flash("error", "Invoice data is incomplete.");
         return res.redirect("/patient/dashboard");
       }
 
       const pdfBuffer = await generateInvoicePDF(payment, patientInfo[0]);
 
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `attachment; filename=invoice_${payment.paymentId}.pdf`);
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename=invoice_${payment.paymentId}.pdf`,
+      );
       res.send(pdfBuffer);
     } catch (err) {
       console.error("Download Invoice Error:", err);
-      req.flash('error', 'Failed to download invoice.');
+      req.flash("error", "Failed to download invoice.");
       res.redirect("/patient/dashboard");
     }
   }
@@ -618,7 +697,7 @@ class patientController {
       });
 
       if (!appt || !appt.medicalReport) {
-        req.flash('error', 'Medical report not found.');
+        req.flash("error", "Medical report not found.");
         return res.redirect("/patient/dashboard");
       }
 
@@ -627,51 +706,64 @@ class patientController {
       // Helper function to resolve extension from content-type header
       const getExtensionFromContentType = (contentType, defaultExt) => {
         const mimeToExt = {
-          'application/pdf': 'pdf',
-          'image/png': 'png',
-          'image/jpeg': 'jpg',
-          'image/jpg': 'jpg',
-          'image/gif': 'gif',
-          'image/webp': 'webp',
+          "application/pdf": "pdf",
+          "image/png": "png",
+          "image/jpeg": "jpg",
+          "image/jpg": "jpg",
+          "image/gif": "gif",
+          "image/webp": "webp",
         };
         return mimeToExt[contentType] || defaultExt;
       };
 
       // Stream the file from Cloudinary through our server
-      const protocol = fileUrl.startsWith('https') ? https : http;
-      protocol.get(fileUrl, (remoteRes) => {
-        // Follow redirects (Cloudinary may redirect)
-        if (remoteRes.statusCode === 301 || remoteRes.statusCode === 302) {
-          const redirectUrl = remoteRes.headers.location;
-          const redirectProtocol = redirectUrl.startsWith('https') ? https : http;
-          redirectProtocol.get(redirectUrl, (redirectedRes) => {
-            const contentType = redirectedRes.headers['content-type'] || 'application/pdf';
-            const ext = getExtensionFromContentType(contentType, 'pdf');
-            res.setHeader('Content-Type', contentType);
-            res.setHeader('Content-Disposition', `attachment; filename="medical_report_${appointmentId}.${ext}"`);
-            redirectedRes.pipe(res);
-          }).on('error', (err) => {
-            console.error('Redirect stream error:', err);
-            req.flash('error', 'Failed to download report.');
-            res.redirect("/patient/dashboard");
-          });
-          return;
-        }
+      const protocol = fileUrl.startsWith("https") ? https : http;
+      protocol
+        .get(fileUrl, (remoteRes) => {
+          // Follow redirects (Cloudinary may redirect)
+          if (remoteRes.statusCode === 301 || remoteRes.statusCode === 302) {
+            const redirectUrl = remoteRes.headers.location;
+            const redirectProtocol = redirectUrl.startsWith("https")
+              ? https
+              : http;
+            redirectProtocol
+              .get(redirectUrl, (redirectedRes) => {
+                const contentType =
+                  redirectedRes.headers["content-type"] || "application/pdf";
+                const ext = getExtensionFromContentType(contentType, "pdf");
+                res.setHeader("Content-Type", contentType);
+                res.setHeader(
+                  "Content-Disposition",
+                  `attachment; filename="medical_report_${appointmentId}.${ext}"`,
+                );
+                redirectedRes.pipe(res);
+              })
+              .on("error", (err) => {
+                console.error("Redirect stream error:", err);
+                req.flash("error", "Failed to download report.");
+                res.redirect("/patient/dashboard");
+              });
+            return;
+          }
 
-        const contentType = remoteRes.headers['content-type'] || 'application/pdf';
-        const ext = getExtensionFromContentType(contentType, 'pdf');
-        res.setHeader('Content-Type', contentType);
-        res.setHeader('Content-Disposition', `attachment; filename="medical_report_${appointmentId}.${ext}"`);
-        remoteRes.pipe(res);
-      }).on('error', (err) => {
-        console.error('Medical report download error:', err);
-        req.flash('error', 'Failed to download report.');
-        res.redirect("/patient/dashboard");
-      });
-
+          const contentType =
+            remoteRes.headers["content-type"] || "application/pdf";
+          const ext = getExtensionFromContentType(contentType, "pdf");
+          res.setHeader("Content-Type", contentType);
+          res.setHeader(
+            "Content-Disposition",
+            `attachment; filename="medical_report_${appointmentId}.${ext}"`,
+          );
+          remoteRes.pipe(res);
+        })
+        .on("error", (err) => {
+          console.error("Medical report download error:", err);
+          req.flash("error", "Failed to download report.");
+          res.redirect("/patient/dashboard");
+        });
     } catch (err) {
       console.error("Download Medical Report Error:", err);
-      req.flash('error', 'Failed to download medical report.');
+      req.flash("error", "Failed to download medical report.");
       res.redirect("/patient/dashboard");
     }
   }

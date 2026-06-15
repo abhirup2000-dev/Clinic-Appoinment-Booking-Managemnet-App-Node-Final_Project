@@ -58,7 +58,7 @@
     height: 3px;
     width: 100%;
     background: currentColor;
-    opacity: 0.4;
+    opacity: 0.8;
     animation: shrink 4s linear forwards;
   }
 
@@ -123,14 +123,14 @@
     const el = btn.closest(".custom-alert");
     el.style.opacity = "0";
     el.style.transform = "translateX(40px)";
-    setTimeout(() => el.remove(), 250);
+    setTimeout(() => el.remove(), 4000);
   }
 
   setTimeout(() => {
     document.querySelectorAll(".custom-alert").forEach(el => {
       el.style.opacity = "0";
       el.style.transform = "translateX(40px)";
-      setTimeout(() => el.remove(), 250);
+      setTimeout(() => el.remove(), 4000);
     });
   }, 4000);
 </script>

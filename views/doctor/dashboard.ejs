@@ -214,33 +214,6 @@
                             <a href="/doctor/live-chat/<%= appt._id %>" class="btn btn-sm btn-cc-outline px-3 py-1.5" style="border-color:var(--cc-indigo); color:var(--cc-indigo)!important; border-radius:8px;">
                               <i class="bi bi-chat-dots me-1"></i> Chat
                             </a>
-
-                            <!-- Prescription Modal -->
-                            <div class="modal fade" id="completeModal<%= appt._id %>" tabindex="-1" aria-hidden="true">
-                              <div class="modal-dialog modal-dialog-centered">
-                                <div class="modal-content border-0 shadow" style="border-radius: var(--radius-xl);">
-                                  <div class="modal-header border-0 pb-0">
-                                    <h5 class="modal-title fw-bold text-dark">Complete Consultation</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                  </div>
-                                  <div class="modal-body p-4">
-                                    <form action="/doctor/appointments/complete/<%= appt._id %>" method="POST">
-                                      <div class="mb-3 text-start">
-                                        <label class="form-label small fw-bold text-muted">Patient</label>
-                                        <div class="fw-semibold text-dark"><%= appt.patient ? appt.patient.name : 'Unknown Patient' %></div>
-                                      </div>
-                                      <div class="mb-4">
-                                        <label class="form-label small fw-bold text-muted">Draft Prescription & Notes</label>
-                                        <textarea name="prescription" class="form-control" rows="4" placeholder="Enter medicines, dosages, diagnostic recommendations..." required style="height: auto;"></textarea>
-                                      </div>
-                                      <button type="submit" class="btn btn-cc-primary w-100 py-3" style="background:var(--cc-emerald);">
-                                        Save & Dispatch Prescription
-                                      </button>
-                                    </form>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
                           <% } %>
                         </div>
                       </td>
@@ -322,33 +295,6 @@
                               </a>
                             <% } %>
                           </div>
-
-                          <!-- Upload Report Modal -->
-                          <div class="modal fade" id="uploadReportModal<%= appt._id %>" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered">
-                              <div class="modal-content border-0 shadow" style="border-radius: var(--radius-xl);">
-                                <div class="modal-header border-0 pb-0">
-                                  <h5 class="modal-title fw-bold text-dark">Upload Medical Report</h5>
-                                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body p-4">
-                                  <form action="/doctor/appointments/upload-report/<%= appt._id %>" method="POST" enctype="multipart/form-data">
-                                    <div class="mb-3 text-start">
-                                      <label class="form-label small fw-bold text-muted">Patient</label>
-                                      <div class="fw-semibold text-dark"><%= appt.patient ? appt.patient.name : 'Unknown Patient' %></div>
-                                    </div>
-                                    <div class="mb-4 text-start">
-                                      <label class="form-label small fw-bold text-muted">Select File (PDF, Images)</label>
-                                      <input type="file" name="report" class="form-control" accept=".pdf,image/*" required>
-                                    </div>
-                                    <button type="submit" class="btn btn-cc-primary w-100 py-3" style="background:var(--cc-emerald);">
-                                      <i class="bi bi-cloud-upload me-1"></i> Upload Report
-                                    </button>
-                                  </form>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
                         <% } %>
                       </td>
                     </tr>
@@ -421,6 +367,68 @@
       </div>
     </div>
   </div>
+
+  <!-- Complete Consultation Modals — rendered OUTSIDE the table to prevent DOM glitching -->
+  <% activeAppointments.forEach(appt => { %>
+    <% if (appt.status === 'confirmed') { %>
+      <div class="modal fade" id="completeModal<%= appt._id %>" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content border-0 shadow" style="border-radius: var(--radius-xl);">
+            <div class="modal-header border-0 pb-0">
+              <h5 class="modal-title fw-bold text-dark">Complete Consultation</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+              <form action="/doctor/appointments/complete/<%= appt._id %>" method="POST">
+                <div class="mb-3 text-start">
+                  <label class="form-label small fw-bold text-muted">Patient</label>
+                  <div class="fw-semibold text-dark"><%= appt.patient ? appt.patient.name : 'Unknown Patient' %></div>
+                </div>
+                <div class="mb-4">
+                  <label class="form-label small fw-bold text-muted">Draft Prescription & Notes</label>
+                  <textarea name="prescription" class="form-control" rows="4" placeholder="Enter medicines, dosages, diagnostic recommendations..." required style="height: auto;"></textarea>
+                </div>
+                <button type="submit" class="btn btn-cc-primary w-100 py-3" style="background:var(--cc-emerald);">
+                  Save & Dispatch Prescription
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% } %>
+  <% }) %>
+
+  <!-- Upload Report Modals — rendered OUTSIDE the table to prevent DOM glitching -->
+  <% finishedAppointments.forEach(appt => { %>
+    <% if (appt.status === 'completed') { %>
+      <div class="modal fade" id="uploadReportModal<%= appt._id %>" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content border-0 shadow" style="border-radius: var(--radius-xl);">
+            <div class="modal-header border-0 pb-0">
+              <h5 class="modal-title fw-bold text-dark">Upload Medical Report</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+              <form action="/doctor/appointments/upload-report/<%= appt._id %>" method="POST" enctype="multipart/form-data">
+                <div class="mb-3 text-start">
+                  <label class="form-label small fw-bold text-muted">Patient</label>
+                  <div class="fw-semibold text-dark"><%= appt.patient ? appt.patient.name : 'Unknown Patient' %></div>
+                </div>
+                <div class="mb-4 text-start">
+                  <label class="form-label small fw-bold text-muted">Select File (PDF, Images)</label>
+                  <input type="file" name="report" class="form-control" accept=".pdf,image/*" required>
+                </div>
+                <button type="submit" class="btn btn-cc-primary w-100 py-3" style="background:var(--cc-emerald);">
+                  <i class="bi bi-cloud-upload me-1"></i> Upload Report
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% } %>
+  <% }) %>
 
   <!-- Socket.IO Client -->
   <script src="/socket.io/socket.io.js"></script>
